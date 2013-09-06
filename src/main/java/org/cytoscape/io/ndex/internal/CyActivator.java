@@ -13,6 +13,8 @@ public class CyActivator extends AbstractCyActivator {
 	public void start(BundleContext context) throws Exception {
 	
 	Properties properties = new Properties();
-//		registerService(context, sampleAnalyzer, SampleAnalyzer.class, properties);;
+//		registerService(context, sampleAnalyzer, SampleAnalyzer.class, properties);
+	
+		// TODO: Export NdexBundleReader and Web Service Clients
 	}
 }
