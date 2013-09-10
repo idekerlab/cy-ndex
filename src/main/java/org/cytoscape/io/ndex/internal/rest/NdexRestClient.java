@@ -69,7 +69,8 @@ public class NdexRestClient {
 	 * getnetwork
 	 */
 	public CyNetwork getNetwork(final String ndexNetworkId) {
-		return null;
+		CyNetwork network = factory.createNetwork();
+		return network;
 	}
 
 	/**
