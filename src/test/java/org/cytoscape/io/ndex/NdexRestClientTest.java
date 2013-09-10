@@ -6,19 +6,24 @@ import java.util.Collection;
 
 import javax.naming.spi.DirStateFactory.Result;
 
+import org.cytoscape.ding.NetworkViewTestSupport;
 import org.cytoscape.io.ndex.internal.rest.NdexRestClient;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class NdexRestClientTest {
 
 	private NdexRestClient client;
-	
+	private NetworkViewTestSupport support = new NetworkViewTestSupport();
+	private final CyNetworkFactory networkFactory = support.getNetworkFactory();
 	
 	@Before
 	public void setUp() throws Exception {
-		client = new NdexRestClient();
+		client = new NdexRestClient(networkFactory);
 	}
 
 	@After
@@ -27,14 +32,18 @@ public class NdexRestClientTest {
 
 	@Test
 	public void testSearch() throws Exception {
-		Collection<String> result = client.findNetworks("dsadsa");
-		//assertNotNull(result);
+		Collection<String> result = client.findNetworks("A");
+		assertNotNull(result);
 		//assertEquals("network1", result);
 		
 	}
 
 	@Test
 	public void testImportNetwork() throws Exception {
+		//String url = "http://localhost:3333/networks/C11R0";
+		
+		CyNetwork network = client.getNetwork("C11R0");
+		assertNotNull(network);
 	}
 
 	@Test
