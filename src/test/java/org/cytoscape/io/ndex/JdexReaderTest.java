@@ -42,7 +42,7 @@ public class JdexReaderTest {
 
 	@Test
 	public void test() throws Exception {
-		File cyjdex1 = new File("./src/test/resources/testData/testNetwork.jdex");
+		File cyjdex1 = new File("./src/test/resources/testData/NCI_NATURE.FoxO family signaling.517135.jdex");
 
 		InputStream is = new FileInputStream(cyjdex1);
 		NdexBundleReader reader = new NdexBundleReader(is, viewFactory, networkFactory, networkManager, rootNetworkManager);
@@ -51,9 +51,19 @@ public class JdexReaderTest {
 		testLoadedNetwork(networks);
 		is.close();
 	}
-
-	public void testLoadedNetwork(CyNetwork[] network) {
+	
+	
+	public void testLoadedNetwork(CyNetwork[] networks) {
+		assertNotNull(networks);
+		assertEquals(1, networks.length);
+		CyNetwork network = networks[0];
 		assertNotNull(network);
-		
+		//ノード51
+		assertEquals(network.getNodeCount(),51);
+		//エッジ152
+		assertEquals(network.getEdgeCount(), 152);
+
+		//term56
+
 	}
 }
