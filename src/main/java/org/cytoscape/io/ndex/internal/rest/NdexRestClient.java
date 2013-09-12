@@ -2,14 +2,18 @@ package org.cytoscape.io.ndex.internal.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
+import org.apache.commons.codec.binary.Base64;
+import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.subnetwork.CyRootNetworkManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,9 +28,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class NdexRestClient {
 
 	CyNetworkFactory factory;
+	CyNetworkViewFactory viewFactory;
+	CyNetworkManager networkManager;
+	CyRootNetworkManager rootNetworkManager;
 
-	public NdexRestClient(CyNetworkFactory factory) {
+	
+	public NdexRestClient(CyNetworkFactory factory,
+			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
+			CyRootNetworkManager rootNetworkManager) {
 		this.factory = factory;
+		this.viewFactory = viewFactory;
+		this.networkManager = networkManager;
+		this.rootNetworkManager = rootNetworkManager;
 	}
 
 	/**
@@ -48,7 +61,17 @@ public class NdexRestClient {
 		URL request = new URL(
 				"http://localhost:3333/networks/?searchExpression=" + query
 						+ "&limit=100&offset=0");
-		JsonNode searchNode = mapper.readTree(request);
+		HttpURLConnection con = (HttpURLConnection) request.openConnection();
+		addBasicAuth(con);
+		/*
+		 * String credentials = "dexterpratt:insecure"; String basicAuth =
+		 * "Basic " + new String(new Base64().encode(credentials.getBytes()));
+		 * con.setRequestProperty("Authorization", basicAuth);
+		 */
+
+		InputStream is = con.getInputStream();
+
+		JsonNode searchNode = mapper.readTree(is);
 
 		searchNode.path("networks").elements();
 
@@ -67,8 +90,17 @@ public class NdexRestClient {
 	 * 
 	 * https://github.com/cytoscape/NDEx-Site/wiki/REST-API-Documentation#
 	 * getnetwork
+	 * 
+	 * @throws IOException
 	 */
-	public CyNetwork getNetwork(final String ndexNetworkId) {
+	public CyNetwork getNetwork(final String ndexNetworkId) throws IOException {
+		
+		URL request = new URL("http://localhost:3333/networks/"+ndexNetworkId);
+		HttpURLConnection con = (HttpURLConnection)request.openConnection();
+		addBasicAuth(con);
+		InputStream is = con.getInputStream();
+		
+		//NdexBundleReader reader = new NdexBundleReader(is, viewFactory, factory, networkManager, rootNetworkManager);
 		CyNetwork network = factory.createNetwork();
 		return network;
 	}
@@ -109,4 +141,14 @@ public class NdexRestClient {
 			final String ndexNetworkId) {
 
 	}
+
+	private void addBasicAuth(HttpURLConnection con) {
+		String credentials = "dexterpratt:insecure";
+		String basicAuth = "Basic "
+				+ new String(new Base64().encode(credentials.getBytes()));
+		con.setRequestProperty("Authorization", basicAuth);
+	}
+	
+
+
 }
