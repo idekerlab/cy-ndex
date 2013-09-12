@@ -3,6 +3,7 @@ package org.cytoscape.io.ndex.internal.reader;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.model.CyEdge;
@@ -24,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  */
 public class NdexBundleReader extends AbstractCyNetworkReader {
-	
+
 	// Supports only one CyNetwork per file.
 	private CyNetwork network = null;
 
@@ -35,7 +36,7 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 			CyRootNetworkManager cyRootNetworkManager) {
 		super(inputStream, cyNetworkViewFactory, cyNetworkFactory,
 				cyNetworkManager, cyRootNetworkManager);
-		if(inputStream == null) {
+		if (inputStream == null) {
 			throw new NullPointerException("Input Stream cannot be null.");
 		}
 
@@ -55,37 +56,58 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		this.network = cyNetworkFactory.createNetwork(); 
-		
+		this.network = cyNetworkFactory.createNetwork();
+
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = mapper.readTree(inputStream);
-		
-		
-		HashMap<String, CyNode> nodeMap = new HashMap<String, CyNode>();
-		//add nodes
+
+		// create term map
+		Map<String, String> termMap = new HashMap<String, String>();
+		final JsonNode terms = rootNode.path("terms");
+
+		for (Iterator<String> termNames = terms.fieldNames(); termNames
+				.hasNext();) {
+			final String termName = termNames.next();
+			termMap.put(termName, terms.get(termName).get("name").asText());
+		}
+
+		// add nodes
+		Map<String, CyNode> nodeMap = new HashMap<String, CyNode>();
+
 		final JsonNode nodes = rootNode.path("nodes");
-		//final Iterator<String> nodeNames = nodes.fieldNames();
-		for(Iterator<String> nodeNames = nodes.fieldNames();nodeNames.hasNext();){
+
+		// immutable value is not fixed
+		network.getDefaultNodeTable().createColumn("readable name",
+				String.class, true);
+
+		for (Iterator<String> nodeNames = nodes.fieldNames(); nodeNames
+				.hasNext();) {
+			final String interId = nodeNames.next();
+			final String name = nodes.get(interId).get("name").asText();
+			final String readableName = termMap.get(nodes.get(interId)
+					.get("represents").asText());
+			// System.out.println(name +" "+readableName);
+
 			final CyNode node = network.addNode();
-			nodeMap.put(nodeNames.next(), node);
+
+			network.getRow(node).set(CyNetwork.NAME, name);
+			network.getRow(node).set("readable name", readableName);
+
+			nodeMap.put(interId, node);
+
 		}
-		
-		/*
-		for (final JsonNode jNode : nodes.fieldNames()) {
-			final CyNode node = network.addNode();
-			nodeMap.put(jNode., value)
-			
-		}
-		*/
-		
-		//add edges
-		//HashMap<String, CyEdge> edgeMap = new HashMap<String, CyEdge>();
-		
+
+		// add edges
 		final JsonNode edges = rootNode.path("edges");
+		network.getDefaultEdgeTable().createColumn("predicate id",
+				String.class, true);
 		for (final JsonNode jNode : edges) {
-			//System.out.println(nodeMap.get(jNode.get("s").asText()));
-			final CyEdge edge = network.addEdge(nodeMap.get(jNode.get("s").asText()),nodeMap.get(jNode.get("o").asText()) , true);
+			final CyNode soueceNode = nodeMap.get(jNode.get("s").asText());
+			final CyNode targetNode = nodeMap.get(jNode.get("o").asText());
+
+			final CyEdge edge = network.addEdge(soueceNode, targetNode, true);
+			network.getRow(edge).set("predicate id", jNode.get("p").asText());
 		}
-		
+
 	}
 }
