@@ -76,7 +76,7 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 		final JsonNode nodes = rootNode.path("nodes");
 
-		// immutable value is not fixed
+		// field name is not fixed
 		network.getDefaultNodeTable().createColumn("readable name",
 				String.class, true);
 
@@ -99,15 +99,18 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 		// add edges
 		final JsonNode edges = rootNode.path("edges");
-		network.getDefaultEdgeTable().createColumn("predicate id",
+		network.getDefaultEdgeTable().createColumn("readable name",
 				String.class, true);
 		for (final JsonNode jNode : edges) {
 			final CyNode soueceNode = nodeMap.get(jNode.get("s").asText());
 			final CyNode targetNode = nodeMap.get(jNode.get("o").asText());
 
 			final CyEdge edge = network.addEdge(soueceNode, targetNode, true);
-			network.getRow(edge).set("predicate id", jNode.get("p").asText());
+			
+			final String readableName = termMap.get(jNode.get("p").asText());
+			network.getRow(edge).set("readable name", readableName);
 		}
 
 	}
+	
 }

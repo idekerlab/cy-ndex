@@ -193,6 +193,15 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock</artifactId>
+			<version>1.33</version>
+			<scope>test</scope>
+			<!-- Include this if you have dependency conflicts for Guava, Jetty, Jackson 
+				or Apache HTTP Client -->
+			<!-- <classifier>standalone</classifier> -->
+		</dependency>
 
 		<dependency>
 			<groupId>org.skyscreamer</groupId>

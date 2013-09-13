@@ -71,12 +71,13 @@ public class JdexReaderTest {
 		assertEquals(152, network.getEdgeCount());
 
 		CyTable nodeTable = network.getDefaultNodeTable();
+		CyTable edgeTable = network.getDefaultEdgeTable();		
+		// テーブルが正しく作られているか
 
 		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
 				.getValues(String.class).indexOf("539302");
 		assertNotEquals(-1, nameIndex);
 
-		// テーブルが正しく作られているか
 		assertNotNull(nodeTable.getColumn("readable name"));
 		int readableIndex = nodeTable.getColumn("readable name")
 				.getValues(String.class).indexOf("Ran/GTP");
@@ -87,17 +88,18 @@ public class JdexReaderTest {
 			final Map<String,Object> map = row.getAllValues();
 			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(CyNetwork.NAME) + " " + map.get("readable name"));
 		}
+		
+		//display the edge table
+		for(CyRow row : edgeTable.getAllRows()){
+			final Map<String,Object> map = row.getAllValues();
+			System.out.println(map.get(CyNetwork.SUID) + " " + map.get("readable name"));
+		}
 
 
 		// term56
 		/* ここから先はまだ */
 		// nameが"539302"のノードのreadable nameが"Ran/GTP"になってるか
 
-		// int indexOfname =
-		// network.getDefaultNodeTable().getColumn("name").getValues(String.class).indexOf("539302");
-		// int indexOfReadablename =
-		// network.getDefaultNodeTable().getColumn("readable name").getValues(String.class).indexOf("Ran/GTP");
 
-		// assertEquals("Ran/GTP", actual);
 	}
 }
