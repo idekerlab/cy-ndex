@@ -84,9 +84,21 @@ public class NdexRestClientTest {
 	                .withStatus(200)
 	                .withHeader("Content-Type", "application/json")
 	                .withBodyFile("testData/NCI_NATURE.FoxO family signaling.517135.jdex")));
-	               
+	    
+	    stubFor(get(urlEqualTo("/networks/C11R0"))
+	            .withHeader("Authorization", notMatching(basicAuth))
+	            .willReturn(aResponse()
+	                .withStatus(401)
+	                //.withHeader("Content-Type", "application/json")
+	                .withBody("Unauthorized")));     
 				
+	    client.setCredential(null, null);
 		CyNetwork network = client.getNetwork("C11R0");
+		assertEquals(network,null);
+		
+		
+		client.setCredential("dexterpratt", "insecure");
+		network = client.getNetwork("C11R0");
 		assertNotNull(network);
 		
 		// ノード51

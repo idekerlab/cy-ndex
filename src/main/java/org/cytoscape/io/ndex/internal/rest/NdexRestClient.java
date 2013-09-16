@@ -36,11 +36,13 @@ public class NdexRestClient {
 	CyRootNetworkManager rootNetworkManager;
 	TaskMonitor tm;
 
+	// for authorization
+	String userId = null;
+	String password = null;
 
 	public NdexRestClient(CyNetworkFactory factory,
 			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
-			CyRootNetworkManager rootNetworkManager,
-			TaskMonitor tm) {
+			CyRootNetworkManager rootNetworkManager, TaskMonitor tm) {
 		this.factory = factory;
 		this.viewFactory = viewFactory;
 		this.networkManager = networkManager;
@@ -71,7 +73,6 @@ public class NdexRestClient {
 		HttpURLConnection con = (HttpURLConnection) request.openConnection();
 		addBasicAuth(con);
 
-
 		InputStream is = con.getInputStream();
 
 		JsonNode searchNode = mapper.readTree(is);
@@ -94,24 +95,30 @@ public class NdexRestClient {
 	 * 
 	 * https://github.com/cytoscape/NDEx-Site/wiki/REST-API-Documentation#
 	 * getnetwork
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public CyNetwork getNetwork(final String ndexNetworkId) throws Exception {
+		CyNetwork[] networks;
+		CyNetwork network;
 
 		URL request = new URL("http://localhost:3333/networks/" + ndexNetworkId);
 		HttpURLConnection con = (HttpURLConnection) request.openConnection();
 		addBasicAuth(con);
-		InputStream is = con.getInputStream();
-		
+		try {
+			InputStream is = con.getInputStream();
+			NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
+					factory, networkManager, rootNetworkManager);
+			reader.run(tm);
+			networks = reader.getNetworks();
+			network = networks[0];
+			is.close();
+		} catch (IOException e) {
+			// TODO determine what to return when an error is responded
+			// TODO determine output when error is occurred
+			network = null;
+		}
 
-		NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
-				factory, networkManager, rootNetworkManager);
-
-		reader.run(tm);
-		CyNetwork[] networks = reader.getNetworks();
-		CyNetwork network = networks[0];
-
-		is.close();
 		return network;
 	}
 
@@ -153,10 +160,16 @@ public class NdexRestClient {
 	}
 
 	private void addBasicAuth(HttpURLConnection con) {
-		String credentials = "dexterpratt:insecure";
+		// String credentials = "dexterpratt:insecure";
+		String credentials = userId + ":" + password;
 		String basicAuth = "Basic "
 				+ new String(new Base64().encode(credentials.getBytes()));
 		con.setRequestProperty("Authorization", basicAuth);
+	}
+
+	public void setCredential(String id, String password) {
+		this.userId = id;
+		this.password = password;
 	}
 
 }
