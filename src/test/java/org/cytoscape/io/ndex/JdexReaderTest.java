@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
+import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
@@ -78,21 +79,21 @@ public class JdexReaderTest {
 				.getValues(String.class).indexOf("539302");
 		assertNotEquals(-1, nameIndex);
 
-		assertNotNull(nodeTable.getColumn("readable name"));
-		int readableIndex = nodeTable.getColumn("readable name")
+		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
+		int readableIndex = nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName())
 				.getValues(String.class).indexOf("Ran/GTP");
 		assertNotEquals(-1, readableIndex);
 
 		//display the node table
 		for(CyRow row : nodeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
-			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(CyNetwork.NAME) + " " + map.get("readable name"));
+			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(CyNetwork.NAME) + " " + map.get(JdexToken.NODE_REPRESENT.getName()));
 		}
 		
 		//display the edge table
 		for(CyRow row : edgeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
-			System.out.println(map.get(CyNetwork.SUID) + " " + map.get("readable name"));
+			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(JdexToken.EDGE_PREDICATE.getName()));
 		}
 
 

@@ -110,7 +110,6 @@ public class NdexRestClient {
 		reader.run(tm);
 		CyNetwork[] networks = reader.getNetworks();
 		CyNetwork network = networks[0];
-		System.out.println("Edge" + network.getEdgeCount());
 
 		is.close();
 		return network;

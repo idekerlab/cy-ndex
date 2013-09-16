@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -63,52 +64,52 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 		// create term map
 		Map<String, String> termMap = new HashMap<String, String>();
-		final JsonNode terms = rootNode.path("terms");
+		final JsonNode terms = rootNode.path(JdexToken.TERMS.getName());
 
 		for (Iterator<String> termNames = terms.fieldNames(); termNames
 				.hasNext();) {
 			final String termName = termNames.next();
-			termMap.put(termName, terms.get(termName).get("name").asText());
+			termMap.put(termName, terms.get(termName).get(JdexToken.TERM_NAME.getName()).asText());
 		}
 
 		// add nodes
 		Map<String, CyNode> nodeMap = new HashMap<String, CyNode>();
 
-		final JsonNode nodes = rootNode.path("nodes");
+		final JsonNode nodes = rootNode.path(JdexToken.NODES.getName());
 
 		// field name is not fixed
-		network.getDefaultNodeTable().createColumn("readable name",
+		network.getDefaultNodeTable().createColumn(JdexToken.NODE_REPRESENT.getName(),
 				String.class, true);
 
 		for (Iterator<String> nodeNames = nodes.fieldNames(); nodeNames
 				.hasNext();) {
 			final String interId = nodeNames.next();
-			final String name = nodes.get(interId).get("name").asText();
+			final String name = nodes.get(interId).get(JdexToken.NODE_NAME.getName()).asText();
 			final String readableName = termMap.get(nodes.get(interId)
-					.get("represents").asText());
+					.get(JdexToken.NODE_REPRESENT.getName()).asText());
 			// System.out.println(name +" "+readableName);
 
 			final CyNode node = network.addNode();
 
 			network.getRow(node).set(CyNetwork.NAME, name);
-			network.getRow(node).set("readable name", readableName);
+			network.getRow(node).set(JdexToken.NODE_REPRESENT.getName(), readableName);
 
 			nodeMap.put(interId, node);
 
 		}
 
 		// add edges
-		final JsonNode edges = rootNode.path("edges");
-		network.getDefaultEdgeTable().createColumn("readable name",
+		final JsonNode edges = rootNode.path(JdexToken.EDGES.getName());
+		network.getDefaultEdgeTable().createColumn(JdexToken.EDGE_PREDICATE.getName(),
 				String.class, true);
 		for (final JsonNode jNode : edges) {
-			final CyNode soueceNode = nodeMap.get(jNode.get("s").asText());
-			final CyNode targetNode = nodeMap.get(jNode.get("o").asText());
+			final CyNode soueceNode = nodeMap.get(jNode.get(JdexToken.EDGE_SOURCE.getName()).asText());
+			final CyNode targetNode = nodeMap.get(jNode.get(JdexToken.EDGE_TARGET.getName()).asText());
 
 			final CyEdge edge = network.addEdge(soueceNode, targetNode, true);
 			
-			final String readableName = termMap.get(jNode.get("p").asText());
-			network.getRow(edge).set("readable name", readableName);
+			final String readableName = termMap.get(jNode.get(JdexToken.EDGE_PREDICATE.getName()).asText());
+			network.getRow(edge).set(JdexToken.EDGE_PREDICATE.getName(), readableName);
 		}
 
 	}
