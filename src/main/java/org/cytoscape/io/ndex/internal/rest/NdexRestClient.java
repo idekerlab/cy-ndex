@@ -74,10 +74,10 @@ public class NdexRestClient {
 		addBasicAuth(con);
 
 		InputStream is = con.getInputStream();
-
+		// TODO 401 error handling
 		JsonNode searchNode = mapper.readTree(is);
 
-		searchNode.path("networks").elements();
+		// searchNode.path("networks").elements();
 
 		ArrayList<String> result = new ArrayList<String>();
 		for (final JsonNode node : searchNode.path("networks")) {
