@@ -62,58 +62,102 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 	// TODO refactor
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		this.network = cyNetworkFactory.createNetwork();
+		CyNetwork tempNetwork = cyNetworkFactory.createNetwork();
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = mapper.readTree(inputStream);
 
-		// create namespace prefix map
-		Map<String, String> nsPrefixMap = new HashMap<String, String>();
+		// create a namespace prefix map
 		final JsonNode nsJsNode = rootNode.path("namespaces");
-		for (Iterator<String> nsIds = nsJsNode.fieldNames(); nsIds.hasNext();) {
-			final String nsId = nsIds.next();
-			nsPrefixMap.put(nsId, nsJsNode.get(nsId).get("prefix").asText());
-		}
+		Map<String, String> nsPrefixMap = createPrefixMap(nsJsNode);
 
-		// create term map
-		Map<String, String> termMap = new HashMap<String, String>();
+		// create a term map
 		final JsonNode termJsNode = rootNode.path(JdexToken.TERMS.getName());
-
-		for (Iterator<String> termIds = termJsNode.fieldNames(); termIds
-				.hasNext();) {
-			final String termId = termIds.next();
-			termMap.put(termId, getTermString(termId, termJsNode, nsPrefixMap));
-
-		}
+		Map<String, String> termMap = createTermMap(nsPrefixMap, termJsNode);
 
 		// add nodes and create a node map
-		Map<String, CyNode> nodeMap = new HashMap<String, CyNode>();
 		final JsonNode nodeJsNode = rootNode.path(JdexToken.NODES.getName());
-
-		// TODO decide column name
-		network.getDefaultNodeTable().createColumn(
-				JdexToken.NODE_REPRESENT.getName(), String.class, true);
-
-		for (Iterator<String> nodeIds = nodeJsNode.fieldNames(); nodeIds
-				.hasNext();) {
-			final String nodeId = nodeIds.next();
-			final String name = nodeJsNode.get(nodeId)
-					.get(JdexToken.NODE_NAME.getName()).asText();
-			final String represent = termMap.get(nodeJsNode.get(nodeId)
-					.get(JdexToken.NODE_REPRESENT.getName()).asText());
-			final CyNode node = network.addNode();
-
-			network.getRow(node).set(CyNetwork.NAME, name);
-			network.getRow(node).set(JdexToken.NODE_REPRESENT.getName(),
-					represent);
-			nodeMap.put(nodeId, node);
-		}
+		Map<String, CyNode> nodeMap = addNodes(tempNetwork, termMap, nodeJsNode);
 
 		// add edges and create a edge map
-		Map<String, CyEdge> edgeMap = new HashMap<String, CyEdge>();
 		final JsonNode edgeJsNode = rootNode.path(JdexToken.EDGES.getName());
+		Map<String, CyEdge> edgeMap = addEdges(tempNetwork, termMap, nodeMap,
+				edgeJsNode);
+
+		// create citations columns
+		final JsonNode citationJsNode = rootNode.path("citations");
+		addCitations(tempNetwork, edgeMap, citationJsNode);
+
+		//create supports columns
+		final JsonNode supportJsNode = rootNode.path("supports");
+		addSupports(tempNetwork, edgeMap, supportJsNode);
+		
+		this.network = tempNetwork;
+
+	}
+
+	private void addSupports(CyNetwork tempNetwork,
+			Map<String, CyEdge> edgeMap, final JsonNode supportJsNode) {
 		// TODO decide column name
-		network.getDefaultEdgeTable().createColumn(
+		tempNetwork.getDefaultEdgeTable().createColumn("support text",
+				String.class, true);
+		for (final JsonNode jsNode : supportJsNode) {
+			final String text = jsNode.get("text").asText();
+			if (jsNode.has("edges")) {
+				for(final Iterator<JsonNode> edgeIte = jsNode.get("edges").elements();edgeIte.hasNext();){
+					CyEdge edge = edgeMap.get(edgeIte.next().asText());
+					CyRow row = tempNetwork.getRow(edge);
+					row.set("support text", text);
+				}
+			}
+
+		}
+	}
+
+	private void addCitations(CyNetwork tempNetwork,
+			Map<String, CyEdge> edgeMap, final JsonNode citationJsNode) {
+		// TODO decide column name
+		tempNetwork.getDefaultEdgeTable().createColumn("citation identifier",
+				String.class, true);
+		tempNetwork.getDefaultEdgeTable().createColumn("citation type",
+				String.class, true);
+		tempNetwork.getDefaultEdgeTable().createColumn("citation title",
+				String.class, true);
+		tempNetwork.getDefaultEdgeTable().createListColumn(
+				"citation contributors", String.class, true);
+
+		for (final JsonNode jsNode : citationJsNode) {
+			final String identifier = jsNode.get("identifier").asText();
+			final String type = jsNode.get("type").asText();
+			final String title = jsNode.get("title").asText();
+
+			List<String> contributors = new ArrayList<String>();
+
+			for (Iterator<JsonNode> contributorIte = jsNode.get("contributors")
+					.elements(); contributorIte.hasNext();) {
+				String temp = contributorIte.next().asText();
+				contributors.add(temp);
+			}
+
+			for (Iterator<JsonNode> edgeIte = jsNode.get("edges").elements(); edgeIte
+					.hasNext();) {
+				CyEdge edge = edgeMap.get(edgeIte.next().asText());
+				CyRow row = tempNetwork.getRow(edge);
+				row.set("citation identifier", identifier);
+				row.set("citation type", type);
+				row.set("citation title", title);
+				row.set("citation contributors", contributors);
+			}
+
+		}
+	}
+
+	private Map<String, CyEdge> addEdges(CyNetwork tempNetwork,
+			Map<String, String> termMap, Map<String, CyNode> nodeMap,
+			final JsonNode edgeJsNode) {
+		Map<String, CyEdge> edgeMap = new HashMap<String, CyEdge>();
+		// TODO decide column name
+		tempNetwork.getDefaultEdgeTable().createColumn(
 				JdexToken.EDGE_PREDICATE.getName(), String.class, true);
 
 		for (Iterator<String> edgeIds = edgeJsNode.fieldNames(); edgeIds
@@ -126,72 +170,61 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 			final CyNode targetNode = nodeMap.get(tempJsNode.get(
 					JdexToken.EDGE_TARGET.getName()).asText());
 
-			final CyEdge edge = network.addEdge(soueceNode, targetNode, true);
+			final CyEdge edge = tempNetwork.addEdge(soueceNode, targetNode, true);
 
 			final String predicate = termMap.get(tempJsNode.get(
 					JdexToken.EDGE_PREDICATE.getName()).asText());
-			network.getRow(edge).set(JdexToken.EDGE_PREDICATE.getName(),
+			tempNetwork.getRow(edge).set(JdexToken.EDGE_PREDICATE.getName(),
 					predicate);
 
 			edgeMap.put(edgeId, edge);
 		}
+		return edgeMap;
+	}
 
-		// create citations columns
+	private Map<String, CyNode> addNodes(CyNetwork tempNetwork,
+			Map<String, String> termMap, final JsonNode nodeJsNode) {
+		Map<String, CyNode> nodeMap = new HashMap<String, CyNode>();
 
 		// TODO decide column name
-		this.network.getDefaultEdgeTable().createColumn("citation identifier",
-				String.class, true);
-		this.network.getDefaultEdgeTable().createColumn("citation type",
-				String.class, true);
-		this.network.getDefaultEdgeTable().createColumn("citation title",
-				String.class, true);
-		this.network.getDefaultEdgeTable().createListColumn(
-				"citation contributors", String.class, true);
+		tempNetwork.getDefaultNodeTable().createColumn(
+				JdexToken.NODE_REPRESENT.getName(), String.class, true);
 
-		final JsonNode citationJsNode = rootNode.path("citations");
+		for (Iterator<String> nodeIds = nodeJsNode.fieldNames(); nodeIds
+				.hasNext();) {
+			final String nodeId = nodeIds.next();
+			final String name = nodeJsNode.get(nodeId)
+					.get(JdexToken.NODE_NAME.getName()).asText();
+			final String represent = termMap.get(nodeJsNode.get(nodeId)
+					.get(JdexToken.NODE_REPRESENT.getName()).asText());
+			final CyNode node = tempNetwork.addNode();
 
-		for (final JsonNode jNode : citationJsNode) {
-			final String identifier = jNode.get("identifier").asText();
-			final String type = jNode.get("type").asText();
-			final String title = jNode.get("title").asText();
-
-			List<String> contributors = new ArrayList<String>();
-
-			for (Iterator<JsonNode> contributorIte = jNode.get("contributors")
-					.elements(); contributorIte.hasNext();) {
-				String temp = contributorIte.next().asText();
-				contributors.add(temp);
-			}
-
-			for (Iterator<JsonNode> edgeIte = jNode.get("edges").elements(); edgeIte
-					.hasNext();) {
-				CyEdge edge = edgeMap.get(edgeIte.next().asText());
-				CyRow row = this.network.getRow(edge);
-				row.set("citation identifier", identifier);
-				row.set("citation type", type);
-				row.set("citation title", title);
-				row.set("citation contributors", contributors);
-			}
-
+			tempNetwork.getRow(node).set(CyNetwork.NAME, name);
+			tempNetwork.getRow(node).set(JdexToken.NODE_REPRESENT.getName(),
+					represent);
+			nodeMap.put(nodeId, node);
 		}
-		//create supports column
-		// TODO decide column name
-		this.network.getDefaultEdgeTable().createColumn("support text",
-				String.class, true);
+		return nodeMap;
+	}
 
-		final JsonNode supportJsNode = rootNode.path("supports");
-		for (final JsonNode jNode : supportJsNode) {
-			final String text = jNode.get("text").asText();
-			if (jNode.has("edges")) {
-				for(final Iterator<JsonNode> edgeIte = jNode.get("edges").elements();edgeIte.hasNext();){
-					CyEdge edge = edgeMap.get(edgeIte.next().asText());
-					CyRow row = this.network.getRow(edge);
-					row.set("support text", text);
-				}
-			}
-
+	private Map<String, String> createTermMap(Map<String, String> nsPrefixMap,
+			final JsonNode termJsNode) {
+		Map<String, String> termMap = new HashMap<String, String>();
+		for (Iterator<String> termIds = termJsNode.fieldNames(); termIds
+				.hasNext();) {
+			final String termId = termIds.next();
+			termMap.put(termId, getTermString(termId, termJsNode, nsPrefixMap));
 		}
+		return termMap;
+	}
 
+	private Map<String, String> createPrefixMap(final JsonNode nsJsNode) {
+		Map<String, String> nsPrefixMap = new HashMap<String, String>();
+		for (Iterator<String> nsIds = nsJsNode.fieldNames(); nsIds.hasNext();) {
+			final String nsId = nsIds.next();
+			nsPrefixMap.put(nsId, nsJsNode.get(nsId).get("prefix").asText());
+		}
+		return nsPrefixMap;
 	}
 
 	// TODO refactor

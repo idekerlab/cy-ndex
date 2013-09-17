@@ -50,7 +50,7 @@ public class NdexRestClientTest {
 
 	@Test
 	public void testSearch() throws Exception {
-		//search response has not been mocked
+		//search response is not mocked
 		/*
 		Collection<String> result = client.findNetworks("A");
 		assertNotNull(result);
