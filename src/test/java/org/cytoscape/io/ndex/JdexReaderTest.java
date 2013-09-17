@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
@@ -59,10 +61,9 @@ public class JdexReaderTest {
 		final CyNetwork[] networks = reader.getNetworks();
 		testLoadedSmallNetwork(networks);
 		is.close();
-		
 
 	}
-	
+
 	@Test
 	public void testBigNetwork() throws Exception {
 		File cyjdex2 = new File(
@@ -76,7 +77,6 @@ public class JdexReaderTest {
 		is.close();
 	}
 
-
 	public void testLoadedSmallNetwork(CyNetwork[] networks) {
 		assertNotNull(networks);
 		assertEquals(1, networks.length);
@@ -88,7 +88,7 @@ public class JdexReaderTest {
 		assertEquals(152, network.getEdgeCount());
 
 		CyTable nodeTable = network.getDefaultNodeTable();
-		CyTable edgeTable = network.getDefaultEdgeTable();		
+		CyTable edgeTable = network.getDefaultEdgeTable();
 		// テーブルが正しく作られているか
 
 		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
@@ -96,23 +96,27 @@ public class JdexReaderTest {
 		assertNotEquals(-1, nameIndex);
 
 		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
-		int readableIndex = nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName())
+		int readableIndex = nodeTable
+				.getColumn(JdexToken.NODE_REPRESENT.getName())
 				.getValues(String.class).indexOf("Ran/GTP");
 		assertNotEquals(-1, readableIndex);
 
-		//display the node table
-		for(CyRow row : nodeTable.getAllRows()){
-			final Map<String,Object> map = row.getAllValues();
-			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(CyNetwork.NAME) + " " + map.get(JdexToken.NODE_REPRESENT.getName()));
+		// display the node table
+		for (CyRow row : nodeTable.getAllRows()) {
+			final Map<String, Object> map = row.getAllValues();
+			// System.out.println(map.get(CyNetwork.SUID) + " " +
+			// map.get(CyNetwork.NAME) + " " +
+			// map.get(JdexToken.NODE_REPRESENT.getName()));
 		}
-		
-		//display the edge table
-		for(CyRow row : edgeTable.getAllRows()){
-			final Map<String,Object> map = row.getAllValues();
-			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(JdexToken.EDGE_PREDICATE.getName()));
+
+		// display the edge table
+		for (CyRow row : edgeTable.getAllRows()) {
+			final Map<String, Object> map = row.getAllValues();
+			// System.out.println(map.get(CyNetwork.SUID) + " " +
+			// map.get(JdexToken.EDGE_PREDICATE.getName()));
 		}
 	}
-	
+
 	public void testLoadedBigNetwork(CyNetwork[] networks) {
 		assertNotNull(networks);
 		assertEquals(1, networks.length);
@@ -124,9 +128,9 @@ public class JdexReaderTest {
 		assertEquals(1718, network.getEdgeCount());
 
 		CyTable nodeTable = network.getDefaultNodeTable();
-/*		CyTable edgeTable = network.getDefaultEdgeTable();		
+		CyTable edgeTable = network.getDefaultEdgeTable();		
 		// テーブルが正しく作られているか
-
+/*
 		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
 				.getValues(String.class).indexOf("539302");
 		assertNotEquals(-1, nameIndex);
@@ -139,14 +143,21 @@ public class JdexReaderTest {
 		//display the node table
 		for(CyRow row : nodeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
-			System.out.println("SUID = "+map.get(CyNetwork.SUID) + " name = " + map.get(CyNetwork.NAME) + "  represent = " + map.get(JdexToken.NODE_REPRESENT.getName()));
+			//System.out.println("SUID = "+map.get(CyNetwork.SUID) + " name = " + map.get(CyNetwork.NAME) + "  represent = " + map.get(JdexToken.NODE_REPRESENT.getName()));
 		}
-/*		
+		
 		//display the edge table
 		for(CyRow row : edgeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
-			System.out.println(map.get(CyNetwork.SUID) + " " + map.get(JdexToken.EDGE_PREDICATE.getName()));
+			System.out.println(map.get(CyNetwork.SUID) + "\n\t" + 
+			map.get(JdexToken.EDGE_PREDICATE.getName()) + "\n\t" +
+			map.get("citation identifier") + "\n\t" +
+			map.get("citation type") + "\n\t" +
+			map.get("citation title") + "\n\t" +
+			((List<String>)map.get("citation contributors")).toString() + "\n\t" +
+			map.get("support text")
+					);
 		}
-*/
+
 	}
 }
