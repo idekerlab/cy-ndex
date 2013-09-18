@@ -8,12 +8,15 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
+import org.cytoscape.io.internal.write.datatable.csv.CSVCyWriter;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
 import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
 import org.cytoscape.model.CyNetwork;
@@ -77,7 +80,7 @@ public class JdexReaderTest {
 		is.close();
 	}
 
-	public void testLoadedSmallNetwork(CyNetwork[] networks) {
+	public void testLoadedSmallNetwork(CyNetwork[] networks) throws Exception {
 		assertNotNull(networks);
 		assertEquals(1, networks.length);
 		CyNetwork network = networks[0];
@@ -115,9 +118,11 @@ public class JdexReaderTest {
 			// System.out.println(map.get(CyNetwork.SUID) + " " +
 			// map.get(JdexToken.EDGE_PREDICATE.getName()));
 		}
+		
+
 	}
 
-	public void testLoadedBigNetwork(CyNetwork[] networks) {
+	public void testLoadedBigNetwork(CyNetwork[] networks) throws Exception {
 		assertNotNull(networks);
 		assertEquals(1, networks.length);
 		CyNetwork network = networks[0];
@@ -158,6 +163,12 @@ public class JdexReaderTest {
 			map.get("support text")
 					);
 		}
+		
+		File outtest = new File(
+				"./src/test/resources/testData/out.csv");
+		OutputStream os  = new FileOutputStream(outtest);
+		CSVCyWriter writer = new CSVCyWriter(os, edgeTable, true, false, true, "UTF-8");
+		writer.run(tm);
 
 	}
 }
