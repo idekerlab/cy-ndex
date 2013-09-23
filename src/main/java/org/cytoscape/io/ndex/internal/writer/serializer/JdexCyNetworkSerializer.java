@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.util.ArrayBuilders;
 
 public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 
@@ -30,13 +31,17 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 
 		// TODO create id number variable
 		int idNum = 0;
+
+		// create create prefix to namespace id map
+		Map<String, Integer> namespaceMap = new HashMap<String, Integer>();
+		List<String> namespaceList = new ArrayList<String>();
+
 		// create term list
 		List<JdexTermObject> termList = new ArrayList<JdexTermObject>();
 		// create term string to term id map
 		Map<String, String> termMap = new HashMap<String, String>();
 		// create CyNode to id map
 		Map<CyNode, Integer> nodeMap = new HashMap<CyNode, Integer>();
-		// TODO create create prefix to namespace map
 
 		// create citation identifier to citationObject Map
 		Map<String, JdexCitationObject> citationMap = new HashMap<String, JdexCitationObject>();
@@ -47,7 +52,8 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		List<JdexSupportObject> supportList = new ArrayList<JdexSupportObject>();
 
 		// create termParser
-		TermParser parser = new TermParser(termList, termMap);
+		TermParser parser = new TermParser(termList, termMap, namespaceList,
+				namespaceMap);
 
 		//
 		// serialize nodes
@@ -146,9 +152,20 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		// TODO serialize namespaces
 		//
 		jgen.writeObjectFieldStart(JdexToken.NAMESPACES.getName());
-		// write uri
-		// write prefix
-		// write description
+		for (int i = 0; i < namespaceList.size(); i++) {
+			jgen.writeObjectFieldStart(String.valueOf(i));
+			namespaceList.get(i);
+			// write uri
+			jgen.writeFieldName(JdexToken.URI.getName());
+			jgen.writeString("");
+			// write prefix
+			jgen.writeFieldName(JdexToken.PREFIX.getName());
+			jgen.writeString(namespaceList.get(i));
+			// write description
+			jgen.writeFieldName(JdexToken.DESCRIPTION.getName());
+			jgen.writeString("");
+			jgen.writeEndObject();
+		}
 		jgen.writeEndObject();
 
 		//
@@ -165,16 +182,13 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		// write parameters
 		jgen.writeEndObject();
 
-		/*
-		 * jgen.writeObjectFieldStart(JdexToken.NODETYPES.getName());
-		 * jgen.writeEndObject();
-		 */
-		/*
-		 * jgen.writeObjectFieldStart(JdexToken.PROPERTIES.getName());
-		 * jgen.writeEndObject();
-		 */
+		jgen.writeObjectFieldStart(JdexToken.NODETYPES.getName());
+		jgen.writeEndObject();
 
-		// TODO write citations
+		jgen.writeObjectFieldStart(JdexToken.PROPERTIES.getName());
+		jgen.writeEndObject();
+
+		// write citations
 		jgen.writeObjectFieldStart(JdexToken.CITATIONS.getName());
 		for (int i = 0; i < citationList.size(); i++) {
 			final JdexCitationObject object = citationList.get(i);
@@ -206,7 +220,7 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		}
 		jgen.writeEndObject();
 
-		// TODO write supports
+		// write supports
 		jgen.writeObjectFieldStart(JdexToken.SUPPORTS.getName());
 		for (int i = 0; i < supportList.size(); i++) {
 			final JdexSupportObject object = supportList.get(i);

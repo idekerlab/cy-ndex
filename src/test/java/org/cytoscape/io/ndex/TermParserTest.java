@@ -29,11 +29,14 @@ public class TermParserTest {
 		List<JdexTermObject> termList = new ArrayList<JdexTermObject>();
 		Map<String,String> termMap = new HashMap<String,String>();
 		
+		Map<String,Integer> namespaceMap = new HashMap<String, Integer>();
+		List<String> namespaceList = new ArrayList<String>();
+		
 		
 		String test = "bel:peptidaseActivity(bel:complexAbundance(bel:proteinAbundance(HGNC:F3), bel:proteinAbundance(HGNC:F7)))";
 		System.out.println(test);
 		
-		TermParser parser = new TermParser(termList,termMap);
+		TermParser parser = new TermParser(termList,termMap,namespaceList,namespaceMap);
 		parser.parse(test);
 		
 		assertEquals(9,termList.size());
