@@ -12,8 +12,8 @@ public class TermParser {
 	private List<JdexTermObject> termList;
 	private Map<String, String> termMap;
 
-	private List<String> namespaceList;
-	private Map<String, Integer> namespaceMap;
+	private List<JdexNamescapeObject> namespaceList;
+	private Map<String, JdexNamescapeObject> namespaceMap;
 
 	private String termString;
 	private List<String> tokenList;
@@ -21,23 +21,24 @@ public class TermParser {
 	private String currentToken;
 	private String nextToken;
 
-	int termNum = 0;
+	int termId = 0;
 
 	public TermParser(List<JdexTermObject> termList,
-			Map<String, String> termMap, List<String> namespaceList,
-			Map<String, Integer> namespaceMap) {
+			Map<String, String> termMap, List<JdexNamescapeObject> namespaceList,
+			Map<String, JdexNamescapeObject> namespaceMap) {
 		this.termList = termList;
 		this.termMap = termMap;
 		this.namespaceList = namespaceList;
 		this.namespaceMap = namespaceMap;
 	}
 
-	public String parse(String termString) {
+	public String parse(String termString, int idNum) {
 		this.termString = termString;
 		this.tokenList = createTokenList(this.termString);
 		this.tokenItr = tokenList.iterator();
 		currentToken = "";
 		nextToken = "";
+		this.termId = idNum;
 		readToken();
 		readToken();
 		return parseTerm(false).getId();
@@ -87,9 +88,11 @@ public class TermParser {
 
 		} else {
 			termList.add(term);
-			int id = termList.lastIndexOf(term);
+			//int id = termList.lastIndexOf(term);
+			int id = termId;
 			term.setId(String.valueOf(id));
 			termMap.put(term.getName(), String.valueOf(id));
+			termId++;
 			return term;
 		}
 
@@ -97,12 +100,14 @@ public class TermParser {
 
 	private int getNamespaceId(String prefix) {
 		if (namespaceMap.containsKey(prefix)) {
-			int id = namespaceMap.get(prefix);
+			int id = Integer.valueOf(namespaceMap.get(prefix).getId());
 			return id;
 		} else {
-			namespaceList.add(prefix);
-			int id = namespaceList.lastIndexOf(prefix);
-			namespaceMap.put(prefix, id);
+			int id = termId;
+			termId++;
+			JdexNamescapeObject object = new JdexNamescapeObject(String.valueOf(id), "", prefix, "");
+			namespaceList.add(object);
+			namespaceMap.put(prefix, object);
 			return id;
 		}
 	}

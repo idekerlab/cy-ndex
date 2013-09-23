@@ -32,9 +32,9 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		// TODO create id number variable
 		int idNum = 0;
 
-		// create create prefix to namespace id map
-		Map<String, Integer> namespaceMap = new HashMap<String, Integer>();
-		List<String> namespaceList = new ArrayList<String>();
+		// create create prefix to namespaceObject map
+		Map<String, JdexNamescapeObject> namespaceMap = new HashMap<String, JdexNamescapeObject>();
+		List<JdexNamescapeObject> namespaceList = new ArrayList<JdexNamescapeObject>();
 
 		// create term list
 		List<JdexTermObject> termList = new ArrayList<JdexTermObject>();
@@ -73,8 +73,10 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 					String.class));
 			// write represent
 			jgen.writeFieldName(JdexToken.NODE_REPRESENT.getName());
-			jgen.writeNumber(Integer.valueOf(parser.parse(network.getRow(node)
-					.get(JdexToken.NODE_REPRESENT.getName(), String.class))));
+			int termId = Integer.valueOf(parser.parse(network.getRow(node)
+					.get(JdexToken.NODE_REPRESENT.getName(), String.class),idNum));
+			jgen.writeNumber(termId);
+			idNum = ++termId;
 			jgen.writeEndObject();
 		}
 		jgen.writeEndObject();
@@ -93,8 +95,10 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 			jgen.writeNumber(nodeMap.get(edge.getSource()));
 			// write p
 			jgen.writeFieldName(JdexToken.EDGE_PREDICATE.getName());
-			jgen.writeNumber(Integer.valueOf(parser.parse(network.getRow(edge)
-					.get(JdexToken.EDGE_PREDICATE.getName(), String.class))));
+			int termId = Integer.valueOf(parser.parse(network.getRow(edge)
+					.get(JdexToken.EDGE_PREDICATE.getName(), String.class),idNum));
+			jgen.writeNumber(termId);
+			idNum = ++termId;
 			// write o
 			jgen.writeFieldName(JdexToken.EDGE_TARGET.getName());
 			jgen.writeNumber(nodeMap.get(edge.getTarget()));
@@ -104,13 +108,15 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 					String.class) != null) {
 				final String identifier = network.getRow(edge).get(
 						JdexToken.COLUMN_IDENTIFIER.getName(), String.class);
-				final int citationId;
+				int citationId;
 				if (citationMap.containsKey(identifier)) {
 					final JdexCitationObject object = citationMap
 							.get(identifier);
 					object.getEdges().add(edgeId);
-					citationId = citationList.indexOf(object);
+					citationId = Integer.valueOf(object.getId());
 				} else {
+					citationId = idNum;
+					idNum++;
 					final String type = network.getRow(edge).get(
 							JdexToken.COLUMN_TYPE.getName(), String.class);
 					final String title = network.getRow(edge).get(
@@ -119,25 +125,27 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 					final List<String> contributors = network.getRow(edge)
 							.getList(JdexToken.COLUMN_CONTRIBUTORS.getName(),
 									String.class);
-					JdexCitationObject citation = new JdexCitationObject(
+					JdexCitationObject citation = new JdexCitationObject(String.valueOf(citationId),
 							identifier, type, title, edgeIdList, contributors);
 					citation.getEdges().add(edgeId);
 					citationList.add(citation);
-					citationId = citationList.lastIndexOf(citation);
+					//citationId = citationList.lastIndexOf(citation);
 					citationMap.put(identifier, citation);
 				}
 
 				final String text = network.getRow(edge).get(
 						JdexToken.COLUMN_TEXT.getName(), String.class);
-				final int supportId;
+				int supportId;
 				if (supportMap.containsKey(text)) {
 					final JdexSupportObject object = supportMap.get(text);
 					object.getEdges().add(edgeId);
 					// supportId = supportList.indexOf(object);
 				} else {
+					supportId = idNum;
+					idNum++;
 					final List<Integer> edgeIdList = new ArrayList<Integer>();
 
-					JdexSupportObject support = new JdexSupportObject(text,
+					JdexSupportObject support = new JdexSupportObject(String.valueOf(supportId),text,
 							citationId, edgeIdList);
 					support.getEdges().add(edgeId);
 					supportList.add(support);
@@ -152,7 +160,7 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		// TODO serialize namespaces
 		//
 		jgen.writeObjectFieldStart(JdexToken.NAMESPACES.getName());
-		for (int i = 0; i < namespaceList.size(); i++) {
+		/*for (int i = 0; i < namespaceList.size(); i++) {
 			jgen.writeObjectFieldStart(String.valueOf(i));
 			namespaceList.get(i);
 			// write uri
@@ -164,6 +172,20 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 			// write description
 			jgen.writeFieldName(JdexToken.DESCRIPTION.getName());
 			jgen.writeString("");
+			jgen.writeEndObject();
+		}*/
+		for(JdexNamescapeObject object : namespaceList){
+			jgen.writeObjectFieldStart(object.getId());
+			
+			jgen.writeFieldName(JdexToken.URI.getName());
+			jgen.writeString(object.getUri());
+			
+			jgen.writeFieldName(JdexToken.PREFIX.getName());
+			jgen.writeString(object.getPrefix());
+			
+			jgen.writeFieldName(JdexToken.DESCRIPTION.getName());
+			jgen.writeString(object.getDescription());
+			
 			jgen.writeEndObject();
 		}
 		jgen.writeEndObject();
@@ -196,9 +218,10 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 
 		// write citations
 		jgen.writeObjectFieldStart(JdexToken.CITATIONS.getName());
-		for (int i = 0; i < citationList.size(); i++) {
-			final JdexCitationObject object = citationList.get(i);
-			jgen.writeObjectFieldStart(String.valueOf(i));
+		//for (int i = 0; i < citationList.size(); i++) {
+		for(JdexCitationObject object: citationList){
+			//final JdexCitationObject object = citationList.get(i);
+			jgen.writeObjectFieldStart(object.getId());
 			// write identifier
 			jgen.writeFieldName(JdexToken.IDENTIFIER.getName());
 			jgen.writeString(object.getIdentifier());
@@ -228,9 +251,10 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 
 		// write supports
 		jgen.writeObjectFieldStart(JdexToken.SUPPORTS.getName());
-		for (int i = 0; i < supportList.size(); i++) {
-			final JdexSupportObject object = supportList.get(i);
-			jgen.writeObjectFieldStart(String.valueOf(i));
+		//for (int i = 0; i < supportList.size(); i++) {
+		//	final JdexSupportObject object = supportList.get(i);
+		for(JdexSupportObject object:supportList){
+			jgen.writeObjectFieldStart(object.getId());
 			// write text
 			jgen.writeFieldName(JdexToken.TEXT.getName());
 			jgen.writeString(object.getText());

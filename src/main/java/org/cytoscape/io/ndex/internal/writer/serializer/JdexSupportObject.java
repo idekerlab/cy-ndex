@@ -3,15 +3,25 @@ package org.cytoscape.io.ndex.internal.writer.serializer;
 import java.util.List;
 
 public class JdexSupportObject {
+	String id;
 	String text;
 	int citation;
 	List<Integer> edges;
-	public JdexSupportObject(String text, int citation, List<Integer> edges) {
-		super();
+	public JdexSupportObject(String id,String text, int citation, List<Integer> edges) {
+		this.id = id;
 		this.text = text;
 		this.citation = citation;
 		this.edges = edges;
 	}
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getText() {
 		return text;
 	}
