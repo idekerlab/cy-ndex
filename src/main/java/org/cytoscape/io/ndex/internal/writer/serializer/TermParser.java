@@ -117,7 +117,7 @@ public class TermParser {
 
 	// term = termName + "(" params ")" | termName
 	private JdexTermObject parseTerm(boolean isParam) {
-		JdexTermObject name = parseTermName(isParam);
+		TermName name = parseTermName(isParam);
 		if (currentToken.equals("(")) {
 			// 関数名を登録
 			JdexTermObject functionName = getId(name);
@@ -145,14 +145,19 @@ public class TermParser {
 		}
 		// 関数でなければここで名前を登録
 		// prefixの有無とisParamで区別できる
-		JdexTermObject data = getId(name);
+		JdexTermObject data;
+		if((name.getPrefix()!=null)||(!name.isParameter())){
+		data = getId(name);
+		}else{
+			data = name;
+		}
 		System.out
 				.println("value = " + data.getName() + "  id=" + data.getId());
 		return data;
 	}
 
 	// termName = prefix + ":" + name | name
-	private JdexTermObject parseTermName(boolean isParam) {
+	private TermName parseTermName(boolean isParam) {
 		String name = "";
 		if ((nextToken != null) && nextToken.equals(":")) {
 			String prefix = parsePrefix();
@@ -161,13 +166,13 @@ public class TermParser {
 			name = prefix + ":" + unPrefixedName;
 			//
 			int namespaceId = getNamespaceId(prefix);
-			JdexTermObject term = new TermName(name, null,
+			TermName term = new TermName(name, null,
 					String.valueOf(namespaceId), prefix, unPrefixedName,
 					isParam);
 			return term;
 		} else {
 			name = parseName();
-			JdexTermObject term = new TermName(name, null, null, null, name,
+			TermName term = new TermName(name, null, null, null, name,
 					isParam);
 			//
 			return term;

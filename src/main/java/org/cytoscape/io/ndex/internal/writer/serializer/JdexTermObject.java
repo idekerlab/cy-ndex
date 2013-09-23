@@ -41,8 +41,12 @@ public class JdexTermObject {
 
 
 
-	public void serializeSelf(JsonGenerator jgen) {
+	public void serializeSelf(JsonGenerator jgen) throws Exception{
 		// TODO Auto-generated method stub
 
+	}
+	
+	public void serializeSelfAsParameter(JsonGenerator jgen,int paramNum) throws Exception{
+		
 	}
 }

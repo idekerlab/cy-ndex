@@ -48,4 +48,52 @@ public class TermName extends JdexTermObject {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void serializeSelfAsParameter(JsonGenerator jgen, int paramNum)
+			throws Exception {
+
+		if (namespaceId!=null) {
+			jgen.writeObjectFieldStart(String.valueOf(paramNum));
+			jgen.writeFieldName(JdexToken.TERM.getName());
+			jgen.writeNumber(Integer.valueOf(getId()));
+			jgen.writeEndObject();
+		} else {
+			jgen.writeFieldName(String.valueOf(paramNum));
+			jgen.writeString(getName());
+		}
+	}
+
+	public String getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(String namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	public String getUnprefixedName() {
+		return unprefixedName;
+	}
+
+	public void setUnprefixedName(String unprefixedName) {
+		this.unprefixedName = unprefixedName;
+	}
+
+	public boolean isParameter() {
+		return isParameter;
+	}
+
+	public void setParameter(boolean isParameter) {
+		this.isParameter = isParameter;
+	}
+	
 }

@@ -173,13 +173,19 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		//
 		jgen.writeObjectFieldStart(JdexToken.TERMS.getName());
 		for (JdexTermObject term : termList) {
-			term.serializeSelf(jgen);
+			// write name
+			// write ns
+			// ---
+			// write termFunction
+			// write parameters
+			try {
+				term.serializeSelf(jgen);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		// write name
-		// write ns
-		// ---
-		// write termFunction
-		// write parameters
+
 		jgen.writeEndObject();
 
 		jgen.writeObjectFieldStart(JdexToken.NODETYPES.getName());
