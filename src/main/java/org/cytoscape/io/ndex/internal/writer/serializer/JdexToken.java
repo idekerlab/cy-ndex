@@ -18,7 +18,13 @@ public enum JdexToken {
 	CITATIONS("citations"),IDENTIFIER("identifier"),TYPE("type"),TITLE("title"),
 	CONTRIBUTORS("contributors"),
 	
-	SUPPORTS("supports"),TEXT("text"),CITATION("citation");
+	SUPPORTS("supports"),TEXT("text"),CITATION("citation"),
+	
+	//for table column name
+	COLUMN_IDENTIFIER("citation identifier"),COLUMN_TYPE("citation type"),COLUMN_TITLE("citation title"),COLUMN_CONTRIBUTORS("citation contributors"),
+	
+	COLUMN_TEXT("support text")
+	;
 	
 	
 	

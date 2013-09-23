@@ -85,11 +85,11 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 				edgeJsNode);
 
 		// create citations columns
-		final JsonNode citationJsNode = rootNode.path("citations");
+		final JsonNode citationJsNode = rootNode.path(JdexToken.CITATIONS.getName());
 		addCitations(tempNetwork, edgeMap, citationJsNode);
 
 		//create supports columns
-		final JsonNode supportJsNode = rootNode.path("supports");
+		final JsonNode supportJsNode = rootNode.path(JdexToken.SUPPORTS.getName());
 		addSupports(tempNetwork, edgeMap, supportJsNode);
 		
 		this.network = tempNetwork;
@@ -99,15 +99,15 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 	private void addSupports(CyNetwork tempNetwork,
 			Map<String, CyEdge> edgeMap, final JsonNode supportJsNode) {
 		// TODO decide column name
-		tempNetwork.getDefaultEdgeTable().createColumn("support text",
+		tempNetwork.getDefaultEdgeTable().createColumn(JdexToken.COLUMN_TEXT.getName(),
 				String.class, true);
 		for (final JsonNode jsNode : supportJsNode) {
-			final String text = jsNode.get("text").asText();
-			if (jsNode.has("edges")) {
-				for(final Iterator<JsonNode> edgeIte = jsNode.get("edges").elements();edgeIte.hasNext();){
+			final String text = jsNode.get(JdexToken.TEXT.getName()).asText();
+			if (jsNode.has(JdexToken.EDGES.getName())) {
+				for(final Iterator<JsonNode> edgeIte = jsNode.get(JdexToken.EDGES.getName()).elements();edgeIte.hasNext();){
 					CyEdge edge = edgeMap.get(edgeIte.next().asText());
 					CyRow row = tempNetwork.getRow(edge);
-					row.set("support text", text);
+					row.set(JdexToken.COLUMN_TEXT.getName(), text);
 				}
 			}
 
@@ -117,23 +117,23 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 	private void addCitations(CyNetwork tempNetwork,
 			Map<String, CyEdge> edgeMap, final JsonNode citationJsNode) {
 		// TODO decide column name
-		tempNetwork.getDefaultEdgeTable().createColumn("citation identifier",
+		tempNetwork.getDefaultEdgeTable().createColumn(JdexToken.COLUMN_IDENTIFIER.getName(),
 				String.class, true);
-		tempNetwork.getDefaultEdgeTable().createColumn("citation type",
+		tempNetwork.getDefaultEdgeTable().createColumn(JdexToken.COLUMN_TYPE.getName(),
 				String.class, true);
-		tempNetwork.getDefaultEdgeTable().createColumn("citation title",
+		tempNetwork.getDefaultEdgeTable().createColumn(JdexToken.COLUMN_TITLE.getName(),
 				String.class, true);
 		tempNetwork.getDefaultEdgeTable().createListColumn(
-				"citation contributors", String.class, true);
+				JdexToken.COLUMN_CONTRIBUTORS.getName(), String.class, true);
 
 		for (final JsonNode jsNode : citationJsNode) {
-			final String identifier = jsNode.get("identifier").asText();
-			final String type = jsNode.get("type").asText();
-			final String title = jsNode.get("title").asText();
+			final String identifier = jsNode.get(JdexToken.IDENTIFIER.getName()).asText();
+			final String type = jsNode.get(JdexToken.TYPE.getName()).asText();
+			final String title = jsNode.get(JdexToken.TITLE.getName()).asText();
 
 			List<String> contributors = new ArrayList<String>();
 
-			for (Iterator<JsonNode> contributorIte = jsNode.get("contributors")
+			for (Iterator<JsonNode> contributorIte = jsNode.get(JdexToken.CONTRIBUTORS.getName())
 					.elements(); contributorIte.hasNext();) {
 				String temp = contributorIte.next().asText();
 				contributors.add(temp);
@@ -143,10 +143,10 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 					.hasNext();) {
 				CyEdge edge = edgeMap.get(edgeIte.next().asText());
 				CyRow row = tempNetwork.getRow(edge);
-				row.set("citation identifier", identifier);
-				row.set("citation type", type);
-				row.set("citation title", title);
-				row.set("citation contributors", contributors);
+				row.set(JdexToken.COLUMN_IDENTIFIER.getName(), identifier);
+				row.set(JdexToken.COLUMN_TYPE.getName(), type);
+				row.set(JdexToken.COLUMN_TITLE.getName(), title);
+				row.set(JdexToken.COLUMN_CONTRIBUTORS.getName(), contributors);
 			}
 
 		}
