@@ -82,7 +82,8 @@ public class NdexRestClient {
 
 		ArrayList<String> result = new ArrayList<String>();
 		for (final JsonNode node : searchNode.path("networks")) {
-			String resultItem = node.path("jid").asText() + ":" + node.path("title").asText();
+			//TODO change split character to better string
+			String resultItem = node.path("jid").asText() + "," + node.path("title").asText();
 			System.out.println(resultItem);
 			result.add(resultItem);
 		}
@@ -103,7 +104,8 @@ public class NdexRestClient {
 		CyNetwork[] networks;
 		CyNetwork network;
 
-		URL request = new URL("http://localhost:3333/networks/" + ndexNetworkId);
+		// TODO 試験的に別ポートのモックサーバから取りに来ているので直す。
+		URL request = new URL("http://localhost:3334/networks/" + ndexNetworkId);
 		HttpURLConnection con = (HttpURLConnection) request.openConnection();
 		addBasicAuth(con);
 		try {
@@ -113,6 +115,7 @@ public class NdexRestClient {
 			reader.run(monitor);
 			networks = reader.getNetworks();
 			network = networks[0];
+			//System.out.println("node count is" + network.getNodeCount());
 			is.close();
 		} catch (IOException e) {
 			// TODO determine what to return when an error is responded

@@ -10,6 +10,7 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
@@ -36,12 +37,12 @@ public class CyActivator extends AbstractCyActivator {
 				CyNetworkManager.class);
 		CyNetworkViewFactory cyNetworkViewFactoryServiceRef = getService(bc,
 				CyNetworkViewFactory.class);
+		CyNetworkViewManager cyNetworkViewManagerServiceRef = getService(bc, CyNetworkViewManager.class);
 		CyRootNetworkManager cyRootNetworkManagerServiceRef = getService(bc,
 				CyRootNetworkManager.class);
 
 		// TODO create search and import Panel
-		 NdexSearchPanel panel = new NdexSearchPanel(taskManager);
-
+		 NdexSearchPanel panel = new NdexSearchPanel(taskManager, cyNetworkManagerServiceRef, cyNetworkViewFactoryServiceRef, cyNetworkViewManagerServiceRef);
 		// TODO create a web client
 		String uri = "http://localhost/";
 		String displayName = "NDEx client";
