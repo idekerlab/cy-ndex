@@ -21,7 +21,11 @@ public class TermParser {
 	private String currentToken;
 	private String nextToken;
 
-	int termId = 0;
+	Integer termId;
+
+	public Integer getTermId() {
+		return termId;
+	}
 
 	public TermParser(List<JdexTermObject> termList,
 			Map<String, String> termMap, List<JdexNamescapeObject> namespaceList,
@@ -32,7 +36,7 @@ public class TermParser {
 		this.namespaceMap = namespaceMap;
 	}
 
-	public String parse(String termString, int idNum) {
+	public String parse(String termString, Integer idNum) {
 		this.termString = termString;
 		this.tokenList = createTokenList(this.termString);
 		this.tokenItr = tokenList.iterator();

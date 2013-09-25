@@ -30,7 +30,8 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		CyNetwork network = value;
 
 		// TODO create id number variable
-		int idNum = 0;
+		Integer idNum = 0;
+		
 
 		// create create prefix to namespaceObject map
 		Map<String, JdexNamescapeObject> namespaceMap = new HashMap<String, JdexNamescapeObject>();
@@ -61,22 +62,23 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		jgen.writeObjectFieldStart(JdexToken.NODES.getName());
 		List<CyNode> nodes = network.getNodeList();
 		for (CyNode node : nodes) {
+			String temp  = parser.parse(network.getRow(node)
+					.get(JdexToken.NODE_REPRESENT.getName(), String.class),idNum);
+			System.out.println("testtesttest"+temp);
+			int termId = Integer.valueOf(temp);
+			idNum = parser.getTermId();
 			int nodeId = idNum;
 			idNum++;
 			jgen.writeObjectFieldStart(String.valueOf(nodeId));
 			nodeMap.put(node, nodeId);
-
-			// jgen.writeStartObject();
 			// write name
 			jgen.writeFieldName(JdexToken.NODE_NAME.getName());
 			jgen.writeString(network.getRow(node).get(CyNetwork.NAME,
 					String.class));
 			// write represent
 			jgen.writeFieldName(JdexToken.NODE_REPRESENT.getName());
-			int termId = Integer.valueOf(parser.parse(network.getRow(node)
-					.get(JdexToken.NODE_REPRESENT.getName(), String.class),idNum));
 			jgen.writeNumber(termId);
-			idNum = ++termId;
+
 			jgen.writeEndObject();
 		}
 		jgen.writeEndObject();
@@ -98,7 +100,9 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 			int termId = Integer.valueOf(parser.parse(network.getRow(edge)
 					.get(JdexToken.EDGE_PREDICATE.getName(), String.class),idNum));
 			jgen.writeNumber(termId);
-			idNum = ++termId;
+			idNum = parser.getTermId();
+			System.out.println("termID=="+termId + "   idNum =="+idNum);
+			//idNum = ++termId;
 			// write o
 			jgen.writeFieldName(JdexToken.EDGE_TARGET.getName());
 			jgen.writeNumber(nodeMap.get(edge.getTarget()));

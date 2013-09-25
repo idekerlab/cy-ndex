@@ -2,7 +2,6 @@ package org.cytoscape.io.ndex.internal.writer;
 
 import java.io.OutputStream;
 
-import org.cytoscape.io.internal.read.expression.mRNAMeasurement;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.AbstractNetworkTask;

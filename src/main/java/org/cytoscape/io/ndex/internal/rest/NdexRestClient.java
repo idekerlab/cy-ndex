@@ -34,7 +34,8 @@ public class NdexRestClient {
 	CyNetworkViewFactory viewFactory;
 	CyNetworkManager networkManager;
 	CyRootNetworkManager rootNetworkManager;
-	TaskMonitor tm;
+	TaskManager tm;
+	TaskMonitor monitor;
 
 	// for authorization
 	String userId = null;
@@ -42,12 +43,12 @@ public class NdexRestClient {
 
 	public NdexRestClient(CyNetworkFactory factory,
 			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
-			CyRootNetworkManager rootNetworkManager, TaskMonitor tm) {
+			CyRootNetworkManager rootNetworkManager, TaskMonitor monitor) {
 		this.factory = factory;
 		this.viewFactory = viewFactory;
 		this.networkManager = networkManager;
 		this.rootNetworkManager = rootNetworkManager;
-		this.tm = tm;
+		this.monitor = monitor;
 
 	}
 
@@ -81,7 +82,7 @@ public class NdexRestClient {
 
 		ArrayList<String> result = new ArrayList<String>();
 		for (final JsonNode node : searchNode.path("networks")) {
-			String resultItem = node.path("jid") + "" + node.path("title");
+			String resultItem = node.path("jid").asText() + ":" + node.path("title").asText();
 			System.out.println(resultItem);
 			result.add(resultItem);
 		}
@@ -109,7 +110,7 @@ public class NdexRestClient {
 			InputStream is = con.getInputStream();
 			NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
 					factory, networkManager, rootNetworkManager);
-			reader.run(tm);
+			reader.run(monitor);
 			networks = reader.getNetworks();
 			network = networks[0];
 			is.close();
