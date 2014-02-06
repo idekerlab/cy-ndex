@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
-import org.cytoscape.io.internal.write.datatable.csv.CSVCyWriter;
+//import org.cytoscape.io.internal.write.datatable.csv.CSVCyWriter;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
 import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
 import org.cytoscape.model.CyNetwork;
@@ -167,8 +167,8 @@ public class JdexReaderTest {
 		File outtest = new File(
 				"./src/test/resources/testData/out.csv");
 		OutputStream os  = new FileOutputStream(outtest);
-		CSVCyWriter writer = new CSVCyWriter(os, edgeTable, true, false, true, "UTF-8");
-		writer.run(tm);
+		//CSVCyWriter writer = new CSVCyWriter(os, edgeTable, true, false, true, "UTF-8");
+		//writer.run(tm);
 
 	}
 }
