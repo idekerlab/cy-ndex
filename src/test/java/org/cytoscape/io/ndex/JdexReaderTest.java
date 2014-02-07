@@ -53,6 +53,7 @@ public class JdexReaderTest {
 	public void tearDown() throws Exception {
 	}
 
+	/*
 	@Test
 	public void testSmallNetwork() throws Exception {
 		File cyjdex1 = new File(
@@ -135,16 +136,16 @@ public class JdexReaderTest {
 		CyTable nodeTable = network.getDefaultNodeTable();
 		CyTable edgeTable = network.getDefaultEdgeTable();		
 		// テーブルが正しく作られているか
-/*
-		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
-				.getValues(String.class).indexOf("539302");
-		assertNotEquals(-1, nameIndex);
 
-		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
-		int readableIndex = nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName())
-				.getValues(String.class).indexOf("Ran/GTP");
-		assertNotEquals(-1, readableIndex);
-*/
+//		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
+//				.getValues(String.class).indexOf("539302");
+//		assertNotEquals(-1, nameIndex);
+//
+//		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
+//		int readableIndex = nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName())
+//				.getValues(String.class).indexOf("Ran/GTP");
+//		assertNotEquals(-1, readableIndex);
+
 		//display the node table
 		for(CyRow row : nodeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
@@ -171,4 +172,6 @@ public class JdexReaderTest {
 		//writer.run(tm);
 
 	}
+
+*/
 }

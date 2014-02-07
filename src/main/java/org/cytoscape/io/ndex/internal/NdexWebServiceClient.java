@@ -2,7 +2,7 @@ package org.cytoscape.io.ndex.internal;
 
 import java.awt.Container;
 
-import org.cytoscape.io.ndex.internal.rest.NdexRestClient;
+import org.cytoscape.io.ndex.internal.rest.NdexInterface;
 import org.cytoscape.io.ndex.internal.ui.NdexSearchPanel;
 import org.cytoscape.io.webservice.NetworkImportWebServiceClient;
 import org.cytoscape.io.webservice.SearchWebServiceClient;
@@ -17,7 +17,7 @@ import org.cytoscape.work.TaskMonitor;
 public class NdexWebServiceClient extends AbstractWebServiceGUIClient implements
 		NetworkImportWebServiceClient, SearchWebServiceClient {
 
-	private NdexRestClient client;
+	private NdexInterface client;
 
 	public NdexWebServiceClient(String uri, String displayName,
 			String description, CyNetworkFactory factory,
@@ -25,7 +25,7 @@ public class NdexWebServiceClient extends AbstractWebServiceGUIClient implements
 			CyRootNetworkManager rootNetworkManager, TaskMonitor tm,NdexSearchPanel panel) {
 		super(uri, displayName, description);
 
-		this.client = new NdexRestClient(factory, viewFactory, networkManager,
+		this.client = new NdexInterface(factory, viewFactory, networkManager,
 				rootNetworkManager, tm);
 		
 		this.gui = panel;
@@ -43,7 +43,7 @@ public class NdexWebServiceClient extends AbstractWebServiceGUIClient implements
 		return gui;
 	}
 
-	public NdexRestClient getClient() {
+	public NdexInterface getClient() {
 		return client;
 	}
 

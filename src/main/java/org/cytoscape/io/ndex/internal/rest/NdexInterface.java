@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.codec.binary.Base64;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
@@ -17,10 +18,12 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.rest.NdexRestClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Simple REST Client for NDEX web service.
@@ -28,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * TODO: support user authentication!
  * 
  */
-public class NdexRestClient {
+public class NdexInterface {
 
 	CyNetworkFactory factory;
 	CyNetworkViewFactory viewFactory;
@@ -36,12 +39,13 @@ public class NdexRestClient {
 	CyRootNetworkManager rootNetworkManager;
 	TaskManager tm;
 	TaskMonitor monitor;
+	NdexRestClient client;
 
 	// for authorization
 	String userId = null;
 	String password = null;
 
-	public NdexRestClient(CyNetworkFactory factory,
+	public NdexInterface(CyNetworkFactory factory,
 			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
 			CyRootNetworkManager rootNetworkManager, TaskMonitor monitor) {
 		this.factory = factory;
@@ -49,6 +53,7 @@ public class NdexRestClient {
 		this.networkManager = networkManager;
 		this.rootNetworkManager = rootNetworkManager;
 		this.monitor = monitor;
+		this.client = new NdexRestClient("dexterpratt", "insecure");
 
 	}
 
@@ -63,32 +68,26 @@ public class NdexRestClient {
 	 * @throws IOException
 	 * @throws JsonProcessingException
 	 */
-	public Collection<String> findNetworks(final String query)
+	public Collection<String> findNetworks(final String searchString, String searchType, Integer maxNetworks)
 			throws JsonProcessingException, IOException {
-
+		
+		String route = "/networks/search/" + searchType; 
+		//String searchString = "[" + property + "]" + operator + "\"" + value + "\"";
 		ObjectMapper mapper = new ObjectMapper();
+		JsonNode searchParameters = mapper.createObjectNode(); // will be of type ObjectNode
+		((ObjectNode) searchParameters).put("searchString", searchString);
+		((ObjectNode) searchParameters).put("top", maxNetworks.toString());
+		((ObjectNode) searchParameters).put("skip", "0");
 
-		URL request = new URL(
-				"http://localhost:3333/networks/?searchExpression=" + query
-						+ "&limit=100&offset=0");
-		HttpURLConnection con = (HttpURLConnection) request.openConnection();
-		addBasicAuth(con);
-
-		InputStream is = con.getInputStream();
-		// TODO 401 error handling
-		JsonNode searchNode = mapper.readTree(is);
-
-		// searchNode.path("networks").elements();
-
-		ArrayList<String> result = new ArrayList<String>();
-		for (final JsonNode node : searchNode.path("networks")) {
-			//TODO change split character to better string
-			String resultItem = node.path("jid").asText() + "," + node.path("title").asText();
+		JsonNode response = client.post(route, searchParameters);
+		Iterator<JsonNode> networks = response.elements();
+		ArrayList<String> result = new ArrayList<String>();	
+		while (networks.hasNext()){
+			JsonNode network = networks.next();
+			String resultItem = network.path("jid").asText() + "," + network.path("title").asText();
 			System.out.println(resultItem);
 			result.add(resultItem);
 		}
-
-		is.close();
 		return result;
 	}
 
@@ -103,20 +102,14 @@ public class NdexRestClient {
 	public CyNetwork getNetwork(final String ndexNetworkId) throws Exception {
 		CyNetwork[] networks;
 		CyNetwork network;
-
-		// TODO 試験的に別ポートのモックサーバから取りに来ているので直す。
-		URL request = new URL("http://localhost:3334/networks/" + ndexNetworkId);
-		HttpURLConnection con = (HttpURLConnection) request.openConnection();
-		addBasicAuth(con);
 		try {
-			InputStream is = con.getInputStream();
-			NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
+			JsonNode networkInfo = this.client.get("/networks/" + ndexNetworkId, "");
+			NdexBundleReader reader = new NdexBundleReader(networkInfo, viewFactory,
 					factory, networkManager, rootNetworkManager);
 			reader.run(monitor);
 			networks = reader.getNetworks();
 			network = networks[0];
 			//System.out.println("node count is" + network.getNodeCount());
-			is.close();
 		} catch (IOException e) {
 			// TODO determine what to return when an error is responded
 			// TODO determine output when error is occurred

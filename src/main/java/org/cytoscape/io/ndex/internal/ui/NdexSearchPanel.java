@@ -22,7 +22,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.cytoscape.io.ndex.internal.rest.NdexRestClient;
+import org.cytoscape.io.ndex.internal.rest.NdexInterface;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -36,7 +36,7 @@ import org.cytoscape.work.TaskMonitor;
 public class NdexSearchPanel extends JPanel {
 
 	// NdexWebServiceClient ndexClient;
-	NdexRestClient restClient;
+	NdexInterface restClient;
 	TaskManager<?, ?> taskManager;
 	CyNetworkManager manager;
 	CyNetworkViewFactory viewFactory;
@@ -227,7 +227,7 @@ public class NdexSearchPanel extends JPanel {
 		taskManager.execute(new TaskIterator(new ImportNetworkTask()));
 	}
 
-	public void setRestClient(NdexRestClient restClient) {
+	public void setRestClient(NdexInterface restClient) {
 		this.restClient = restClient;
 		
 	}
@@ -239,7 +239,7 @@ public class NdexSearchPanel extends JPanel {
 			restClient.setCredential("dexterpratt", "insecure");
 			String searchString = searchField.getText().toUpperCase();
 			List<String> result = new ArrayList<String>(
-					restClient.findNetworks(searchString));
+					restClient.findNetworks(searchString, "starts-with", 100));
 			System.out.println(result);
 
 			tableModel.setRowCount(0);

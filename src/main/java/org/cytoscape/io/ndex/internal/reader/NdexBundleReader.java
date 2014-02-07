@@ -33,17 +33,19 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 	// Supports only one CyNetwork per file.
 	private CyNetwork network = null;
+	private JsonNode ndexNetwork = null;
 
-	public NdexBundleReader(InputStream inputStream,
+	public NdexBundleReader(JsonNode ndexNetwork,
 			CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory,
 			CyNetworkManager cyNetworkManager,
 			CyRootNetworkManager cyRootNetworkManager) {
-		super(inputStream, cyNetworkViewFactory, cyNetworkFactory,
+		super(null, cyNetworkViewFactory, cyNetworkFactory,
 				cyNetworkManager, cyRootNetworkManager);
-		if (inputStream == null) {
-			throw new NullPointerException("Input Stream cannot be null.");
+		if (ndexNetwork == null) {
+			throw new NullPointerException("ndexNetwork cannot be null.");
 		}
+		this.ndexNetwork = ndexNetwork;
 
 	}
 
@@ -65,31 +67,31 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 		CyNetwork tempNetwork = cyNetworkFactory.createNetwork();
 
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode rootNode = mapper.readTree(inputStream);
+		
 
 		// create a namespace prefix map
-		final JsonNode nsJsNode = rootNode.path("namespaces");
+		final JsonNode nsJsNode = this.ndexNetwork.path("namespaces");
 		Map<String, String> nsPrefixMap = createPrefixMap(nsJsNode);
 
 		// create a term map
-		final JsonNode termJsNode = rootNode.path(JdexToken.TERMS.getName());
+		final JsonNode termJsNode = this.ndexNetwork.path(JdexToken.TERMS.getName());
 		Map<String, String> termMap = createTermMap(nsPrefixMap, termJsNode);
 
 		// add nodes and create a node map
-		final JsonNode nodeJsNode = rootNode.path(JdexToken.NODES.getName());
+		final JsonNode nodeJsNode = this.ndexNetwork.path(JdexToken.NODES.getName());
 		Map<String, CyNode> nodeMap = addNodes(tempNetwork, termMap, nodeJsNode);
 
 		// add edges and create a edge map
-		final JsonNode edgeJsNode = rootNode.path(JdexToken.EDGES.getName());
+		final JsonNode edgeJsNode = this.ndexNetwork.path(JdexToken.EDGES.getName());
 		Map<String, CyEdge> edgeMap = addEdges(tempNetwork, termMap, nodeMap,
 				edgeJsNode);
 
 		// create citations columns
-		final JsonNode citationJsNode = rootNode.path(JdexToken.CITATIONS.getName());
+		final JsonNode citationJsNode = this.ndexNetwork.path(JdexToken.CITATIONS.getName());
 		addCitations(tempNetwork, edgeMap, citationJsNode);
 
 		//create supports columns
-		final JsonNode supportJsNode = rootNode.path(JdexToken.SUPPORTS.getName());
+		final JsonNode supportJsNode = this.ndexNetwork.path(JdexToken.SUPPORTS.getName());
 		addSupports(tempNetwork, edgeMap, supportJsNode);
 		
 		this.network = tempNetwork;

@@ -49,6 +49,7 @@ public class JdexReadWriteTest {
 	public void tearDown() throws Exception {
 	}
 
+	/*
 	@Test
 	public void testSmallNetwork() throws Exception {
 		File cyjdex1 = new File(
@@ -78,6 +79,7 @@ public class JdexReadWriteTest {
 
 		testCytoscapeJdexFileContent(temp, networks[0]);
 	}
+	
 
 	private void testCytoscapeJdexFileContent(File temp, CyNetwork network)
 			throws Exception {
@@ -99,4 +101,6 @@ public class JdexReadWriteTest {
 
 		// /////////////////////////////////////////////
 	}
+	
+	*/
 }
