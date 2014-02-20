@@ -7,7 +7,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<bundle.symbolicName>org.cytoscape.cy-ndex</bundle.symbolicName>
 		<bundle.namespace>org.cytoscape.io.ndex</bundle.namespace>
-		<cytoscape.api.version>3.0.1</cytoscape.api.version>
+		<cytoscape.api.version>3.1.0-SNAPSHOT</cytoscape.api.version>
 
 		<maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
@@ -90,11 +90,7 @@
 					<optimize>true</optimize>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true</showDeprecation>
-					<compilerArguments>
-						<bootclasspath>${java.home}/lib/rt.jar</bootclasspath>
-						<Xmaxwarns>10000</Xmaxwarns>
-						<Xmaxerrs>10000</Xmaxerrs>
-					</compilerArguments>
+
 				</configuration>
 			</plugin>
 			<plugin>
@@ -131,6 +127,13 @@
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
+	
+		<dependency>
+			<groupId>org.ndexbio.client</groupId>
+			<artifactId>ndex-java-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -173,13 +176,13 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.2.2</version>
+			<version>2.3.1</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.2.2</version>
+			<version>2.3.1</version>
 		</dependency>
 
 		<dependency>
@@ -212,6 +215,7 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.github.tomakehurst</groupId>
 			<artifactId>wiremock</artifactId>
@@ -236,18 +240,14 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>model-impl</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>event-api</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>ding-presentation-impl</artifactId>
@@ -255,6 +255,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>ding-presentation-impl</artifactId>
@@ -278,18 +279,21 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>equations-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>property-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>test</scope>
 		</dependency>
+
 
 
 	</dependencies>

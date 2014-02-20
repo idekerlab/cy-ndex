@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
@@ -68,7 +69,7 @@ public class NdexInterface {
 	 * @throws IOException
 	 * @throws JsonProcessingException
 	 */
-	public Collection<String> findNetworks(final String searchString, String searchType, Integer maxNetworks)
+	public List<String> findNetworks(final String searchString, String searchType, Integer maxNetworks)
 			throws JsonProcessingException, IOException {
 		
 		String route = "/networks/search/" + searchType; 
@@ -81,10 +82,10 @@ public class NdexInterface {
 
 		JsonNode response = client.post(route, searchParameters);
 		Iterator<JsonNode> networks = response.elements();
-		ArrayList<String> result = new ArrayList<String>();	
+		List<String> result = new ArrayList<String>();	
 		while (networks.hasNext()){
 			JsonNode network = networks.next();
-			String resultItem = network.path("jid").asText() + "," + network.path("title").asText();
+			String resultItem = network.path("id").asText() + "," + network.path("name").asText();
 			System.out.println(resultItem);
 			result.add(resultItem);
 		}
@@ -113,6 +114,29 @@ public class NdexInterface {
 		} catch (IOException e) {
 			// TODO determine what to return when an error is responded
 			// TODO determine output when error is occurred
+			network = null;
+		}
+
+		return network;
+	}
+	
+	//  "/networks/" + this.ViewModel.Network().id() + "/edges/" + (Network.PageIndex - 1) + "/" + Network.PageSize,
+    // null,
+	public CyNetwork getNetworkByEdges(final String ndexNetworkId, int skip, int top) throws Exception {
+		CyNetwork[] networks;
+		CyNetwork network;
+		try {
+			JsonNode networkInfo = this.client.get("/networks/" + ndexNetworkId + "/edges/" + skip + "/" + top, "");
+			NdexBundleReader reader = new NdexBundleReader(networkInfo, viewFactory,
+					factory, networkManager, rootNetworkManager);
+			reader.run(monitor);
+			networks = reader.getNetworks();
+			network = networks[0];
+			System.out.println("node count is" + network.getNodeCount());
+		} catch (IOException e) {
+			// TODO determine what to return when an error is responded
+			// TODO determine output when error is occurred
+			System.out.println("error in getNetworkByEdges: " + e.getMessage());
 			network = null;
 		}
 

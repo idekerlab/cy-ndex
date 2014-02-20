@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
-import org.cytoscape.io.read.AbstractCyNetworkReader;
+import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
@@ -18,6 +18,7 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 
@@ -29,23 +30,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * section only.
  * 
  */
-public class NdexBundleReader extends AbstractCyNetworkReader {
+public class NdexBundleReader extends AbstractTask implements CyNetworkReader {
 
 	// Supports only one CyNetwork per file.
 	private CyNetwork network = null;
 	private JsonNode ndexNetwork = null;
+	private CyNetworkFactory cyNetworkFactory = null;
 
 	public NdexBundleReader(JsonNode ndexNetwork,
 			CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory,
 			CyNetworkManager cyNetworkManager,
 			CyRootNetworkManager cyRootNetworkManager) {
-		super(null, cyNetworkViewFactory, cyNetworkFactory,
-				cyNetworkManager, cyRootNetworkManager);
+		super();
 		if (ndexNetwork == null) {
 			throw new NullPointerException("ndexNetwork cannot be null.");
 		}
 		this.ndexNetwork = ndexNetwork;
+		this.cyNetworkFactory = cyNetworkFactory;
 
 	}
 
@@ -70,29 +72,29 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 		
 
 		// create a namespace prefix map
-		final JsonNode nsJsNode = this.ndexNetwork.path("namespaces");
-		Map<String, String> nsPrefixMap = createPrefixMap(nsJsNode);
+		final JsonNode namespaces = this.ndexNetwork.path("namespaces");
+		Map<String, String> nsPrefixMap = createPrefixMap(namespaces);
 
 		// create a term map
-		final JsonNode termJsNode = this.ndexNetwork.path(JdexToken.TERMS.getName());
-		Map<String, String> termMap = createTermMap(nsPrefixMap, termJsNode);
+		final JsonNode terms = this.ndexNetwork.path(JdexToken.TERMS.getName());
+		Map<String, String> termMap = createTermMap(nsPrefixMap, terms);
 
 		// add nodes and create a node map
-		final JsonNode nodeJsNode = this.ndexNetwork.path(JdexToken.NODES.getName());
-		Map<String, CyNode> nodeMap = addNodes(tempNetwork, termMap, nodeJsNode);
+		final JsonNode nodes = this.ndexNetwork.path(JdexToken.NODES.getName());
+		Map<String, CyNode> nodeMap = addNodes(tempNetwork, termMap, nodes);
 
 		// add edges and create a edge map
-		final JsonNode edgeJsNode = this.ndexNetwork.path(JdexToken.EDGES.getName());
+		final JsonNode edges = this.ndexNetwork.path(JdexToken.EDGES.getName());
 		Map<String, CyEdge> edgeMap = addEdges(tempNetwork, termMap, nodeMap,
-				edgeJsNode);
+				edges);
 
 		// create citations columns
-		final JsonNode citationJsNode = this.ndexNetwork.path(JdexToken.CITATIONS.getName());
-		addCitations(tempNetwork, edgeMap, citationJsNode);
+		final JsonNode citations = this.ndexNetwork.path(JdexToken.CITATIONS.getName());
+		addCitations(tempNetwork, edgeMap, citations);
 
 		//create supports columns
-		final JsonNode supportJsNode = this.ndexNetwork.path(JdexToken.SUPPORTS.getName());
-		addSupports(tempNetwork, edgeMap, supportJsNode);
+		final JsonNode supports = this.ndexNetwork.path(JdexToken.SUPPORTS.getName());
+		addSupports(tempNetwork, edgeMap, supports);
 		
 		this.network = tempNetwork;
 
@@ -117,7 +119,7 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 	}
 
 	private void addCitations(CyNetwork tempNetwork,
-			Map<String, CyEdge> edgeMap, final JsonNode citationJsNode) {
+			Map<String, CyEdge> edgeMap, final JsonNode citations) {
 		// TODO decide column name
 		tempNetwork.getDefaultEdgeTable().createColumn(JdexToken.COLUMN_IDENTIFIER.getName(),
 				String.class, true);
@@ -128,27 +130,31 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 		tempNetwork.getDefaultEdgeTable().createListColumn(
 				JdexToken.COLUMN_CONTRIBUTORS.getName(), String.class, true);
 
-		for (final JsonNode jsNode : citationJsNode) {
-			final String identifier = jsNode.get(JdexToken.IDENTIFIER.getName()).asText();
-			final String type = jsNode.get(JdexToken.TYPE.getName()).asText();
-			final String title = jsNode.get(JdexToken.TITLE.getName()).asText();
+		for (final JsonNode citation : citations) {
+			final String identifier = citation.get(JdexToken.IDENTIFIER.getName()).asText();
+			final String type = citation.get(JdexToken.TYPE.getName()).asText();
+			final String title = citation.get(JdexToken.TITLE.getName()).asText();
 
 			List<String> contributors = new ArrayList<String>();
-
-			for (Iterator<JsonNode> contributorIte = jsNode.get(JdexToken.CONTRIBUTORS.getName())
-					.elements(); contributorIte.hasNext();) {
-				String temp = contributorIte.next().asText();
-				contributors.add(temp);
+			JsonNode contributorsNode = citation.get(JdexToken.CONTRIBUTORS.getName());
+			if (null != contributorsNode ){
+				for (Iterator<JsonNode> contributorIterator = contributorsNode.elements(); contributorIterator.hasNext();) {
+					String temp = contributorIterator.next().asText();
+					contributors.add(temp);
+				}
 			}
+			
+			JsonNode citationEdgesNode = citation.get("edges");
+			if (null != citationEdgesNode ){
 
-			for (Iterator<JsonNode> edgeIte = jsNode.get("edges").elements(); edgeIte
-					.hasNext();) {
-				CyEdge edge = edgeMap.get(edgeIte.next().asText());
-				CyRow row = tempNetwork.getRow(edge);
-				row.set(JdexToken.COLUMN_IDENTIFIER.getName(), identifier);
-				row.set(JdexToken.COLUMN_TYPE.getName(), type);
-				row.set(JdexToken.COLUMN_TITLE.getName(), title);
-				row.set(JdexToken.COLUMN_CONTRIBUTORS.getName(), contributors);
+				for (Iterator<JsonNode> edgeIterator = citationEdgesNode.elements(); edgeIterator.hasNext();) {
+					CyEdge edge = edgeMap.get(edgeIterator.next().asText());
+					CyRow row = tempNetwork.getRow(edge);
+					row.set(JdexToken.COLUMN_IDENTIFIER.getName(), identifier);
+					row.set(JdexToken.COLUMN_TYPE.getName(), type);
+					row.set(JdexToken.COLUMN_TITLE.getName(), title);
+					row.set(JdexToken.COLUMN_CONTRIBUTORS.getName(), contributors);
+				}
 			}
 
 		}
@@ -190,7 +196,7 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 
 		// TODO decide column name
 		tempNetwork.getDefaultNodeTable().createColumn(
-				JdexToken.NODE_REPRESENT.getName(), String.class, true);
+				JdexToken.NODE_REPRESENTS.getName(), String.class, true);
 
 		for (Iterator<String> nodeIds = nodeJsNode.fieldNames(); nodeIds
 				.hasNext();) {
@@ -198,11 +204,11 @@ public class NdexBundleReader extends AbstractCyNetworkReader {
 			final String name = nodeJsNode.get(nodeId)
 					.get(JdexToken.NODE_NAME.getName()).asText();
 			final String represent = termMap.get(nodeJsNode.get(nodeId)
-					.get(JdexToken.NODE_REPRESENT.getName()).asText());
+					.get(JdexToken.NODE_REPRESENTS.getName()).asText());
 			final CyNode node = tempNetwork.addNode();
 
 			tempNetwork.getRow(node).set(CyNetwork.NAME, name);
-			tempNetwork.getRow(node).set(JdexToken.NODE_REPRESENT.getName(),
+			tempNetwork.getRow(node).set(JdexToken.NODE_REPRESENTS.getName(),
 					represent);
 			nodeMap.put(nodeId, node);
 		}

@@ -259,7 +259,7 @@ public class NdexSearchPanel extends JPanel {
 			if(resultTable.getSelectedRow()>=0){
 				//TODO extract column number
 				String ndexNetworkId = (String)resultTable.getValueAt(resultTable.getSelectedRow(), 0);
-			CyNetwork network = restClient.getNetwork(ndexNetworkId);
+			CyNetwork network = restClient.getNetworkByEdges(ndexNetworkId, 0, 1000);
 			manager.addNetwork(network);
 			System.out.println("network node count is "+network.getNodeCount());
 			CyNetworkView view = viewFactory.createNetworkView(network);

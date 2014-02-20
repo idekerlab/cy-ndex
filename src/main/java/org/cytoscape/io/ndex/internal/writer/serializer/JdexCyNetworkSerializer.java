@@ -63,7 +63,7 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 		List<CyNode> nodes = network.getNodeList();
 		for (CyNode node : nodes) {
 			String temp  = parser.parse(network.getRow(node)
-					.get(JdexToken.NODE_REPRESENT.getName(), String.class),idNum);
+					.get(JdexToken.NODE_REPRESENTS.getName(), String.class),idNum);
 			System.out.println("testtesttest"+temp);
 			int termId = Integer.valueOf(temp);
 			idNum = parser.getTermId();
@@ -76,7 +76,7 @@ public class JdexCyNetworkSerializer extends JsonSerializer<CyNetwork> {
 			jgen.writeString(network.getRow(node).get(CyNetwork.NAME,
 					String.class));
 			// write represent
-			jgen.writeFieldName(JdexToken.NODE_REPRESENT.getName());
+			jgen.writeFieldName(JdexToken.NODE_REPRESENTS.getName());
 			jgen.writeNumber(termId);
 
 			jgen.writeEndObject();

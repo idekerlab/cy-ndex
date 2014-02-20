@@ -2,7 +2,7 @@ package org.cytoscape.io.ndex.internal.writer.serializer;
 
 public enum JdexToken {
 
-	NODES("nodes"),NODE_NAME("name"),NODE_REPRESENT("represents"),
+	NODES("nodes"),NODE_NAME("name"),NODE_REPRESENTS("represents"),
 	
 	EDGES("edges"),EDGE_SOURCE("s"),EDGE_PREDICATE("p"),EDGE_TARGET("o"),
 	

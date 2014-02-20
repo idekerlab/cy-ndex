@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JdexWriterTest {
 
-	private NetworkViewTestSupport support = new NetworkViewTestSupport();
+	//private NetworkViewTestSupport support = new NetworkViewTestSupport();
 	private TaskMonitor tm;
 
 	private Map<Long, CyNode> suid2nodeMap;
@@ -50,7 +50,7 @@ public class JdexWriterTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+/*
 	@Test
 	public void test() throws Exception {
 
@@ -157,10 +157,7 @@ public class JdexWriterTest {
 		network1.getRow(e1).set(JdexToken.COLUMN_TITLE.getName(),
 				"Trends in molecular medicine");
 
-		/*
-		 * "de Nigris F", "Lerman A", "Ignarro LJ", "Williams-Ignarro S",
-		 * "Sica V", "Baker AH", "Lerman LO", "Geng YJ", "Napoli C"
-		 */
+
 		network1.getRow(e1).set(
 				JdexToken.COLUMN_CONTRIBUTORS.getName(),
 				new ArrayList<String>(Arrays.asList("de Nigris F", "Lerman A",
@@ -176,10 +173,9 @@ public class JdexWriterTest {
 		network1.getRow(e2).set(JdexToken.COLUMN_TITLE.getName(),
 				"Trends in molecular medicine");
 
-		/*
-		 * "de Nigris F", "Lerman A", "Ignarro LJ", "Williams-Ignarro S",
-		 * "Sica V", "Baker AH", "Lerman LO", "Geng YJ", "Napoli C"
-		 */
+		// "de Nigris F", "Lerman A", "Ignarro LJ", "Williams-Ignarro S",
+		// "Sica V", "Baker AH", "Lerman LO", "Geng YJ", "Napoli C"
+		 
 		network1.getRow(e2).set(
 				JdexToken.COLUMN_CONTRIBUTORS.getName(),
 				new ArrayList<String>(Arrays.asList("de Nigris F", "Lerman A",
@@ -195,10 +191,8 @@ public class JdexWriterTest {
 		network1.getRow(e3).set(JdexToken.COLUMN_TITLE.getName(),
 				"Oncogene");
 
-		/*
-		 * "de Nigris F", "Lerman A", "Ignarro LJ", "Williams-Ignarro S",
-		 * "Sica V", "Baker AH", "Lerman LO", "Geng YJ", "Napoli C"
-		 */
+		//"de Nigris F", "Lerman A", "Ignarro LJ", "Williams-Ignarro S",
+		//"Sica V", "Baker AH", "Lerman LO", "Geng YJ", "Napoli C"
 		network1.getRow(e3).set(
 				JdexToken.COLUMN_CONTRIBUTORS.getName(),
 				new ArrayList<String>(Arrays.asList("de Nigris F", "Lerman A",
@@ -279,40 +273,42 @@ public class JdexWriterTest {
 		assertEquals(5, hasRepresentField);
 		// assertEquals(1, foundRepresentNum);
 
-		/*
-		 * final JsonNode elements = rootNode.get("elements");
-		 * assertNotNull(elements); assertTrue(elements.isObject());
-		 * 
-		 * Iterator<String> itr = elements.fieldNames();
-		 * 
-		 * final List<String> nodesAndEdgesList = new ArrayList<String>(); while
-		 * (itr.hasNext()) { String val = itr.next();
-		 * nodesAndEdgesList.add(val); System.out.println("Field name: " + val);
-		 * 
-		 * } assertEquals(2, nodesAndEdgesList.size());
-		 * assertTrue(nodesAndEdgesList.contains("nodes"));
-		 * assertTrue(nodesAndEdgesList.contains("edges"));
-		 * 
-		 * JsonNode nodes = elements.get("nodes"); JsonNode edges =
-		 * elements.get("edges");
-		 * 
-		 * assertTrue(nodes.isArray()); assertTrue(edges.isArray());
-		 * 
-		 * assertEquals(5, nodes.size()); assertEquals(4, edges.size());
-		 * 
-		 * for (JsonNode node : nodes) { JsonNode data = node.get("data");
-		 * System.out.println("Node Data = " + data.toString());
-		 * 
-		 * final String nodeName = data.get("name").asText();
-		 * System.out.println("Node Name = " + nodeName);
-		 * 
-		 * assertEquals(nodeName,
-		 * network.getRow(suid2nodeMap.get(data.get("SUID"
-		 * ).asLong())).get(CyNetwork.NAME, String.class));
-		 * assertNotNull(node.get("position")); }
-		 */
 
 		fileInputStream.close();
 	}
-
+*/
 }
+
+/*
+ * final JsonNode elements = rootNode.get("elements");
+ * assertNotNull(elements); assertTrue(elements.isObject());
+ * 
+ * Iterator<String> itr = elements.fieldNames();
+ * 
+ * final List<String> nodesAndEdgesList = new ArrayList<String>(); while
+ * (itr.hasNext()) { String val = itr.next();
+ * nodesAndEdgesList.add(val); System.out.println("Field name: " + val);
+ * 
+ * } assertEquals(2, nodesAndEdgesList.size());
+ * assertTrue(nodesAndEdgesList.contains("nodes"));
+ * assertTrue(nodesAndEdgesList.contains("edges"));
+ * 
+ * JsonNode nodes = elements.get("nodes"); JsonNode edges =
+ * elements.get("edges");
+ * 
+ * assertTrue(nodes.isArray()); assertTrue(edges.isArray());
+ * 
+ * assertEquals(5, nodes.size()); assertEquals(4, edges.size());
+ * 
+ * for (JsonNode node : nodes) { JsonNode data = node.get("data");
+ * System.out.println("Node Data = " + data.toString());
+ * 
+ * final String nodeName = data.get("name").asText();
+ * System.out.println("Node Name = " + nodeName);
+ * 
+ * assertEquals(nodeName,
+ * network.getRow(suid2nodeMap.get(data.get("SUID"
+ * ).asLong())).get(CyNetwork.NAME, String.class));
+ * assertNotNull(node.get("position")); }
+ */
+

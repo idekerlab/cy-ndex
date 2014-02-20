@@ -1,7 +1,7 @@
 package org.cytoscape.io.ndex;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
@@ -19,6 +19,7 @@ import org.cytoscape.ding.NetworkViewTestSupport;
 //import org.cytoscape.io.internal.write.datatable.csv.CSVCyWriter;
 import org.cytoscape.io.ndex.internal.reader.NdexBundleReader;
 import org.cytoscape.io.ndex.internal.writer.serializer.JdexToken;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
@@ -31,6 +32,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class JdexReaderTest {
 
 	private NetworkViewTestSupport support = new NetworkViewTestSupport();
@@ -40,6 +45,7 @@ public class JdexReaderTest {
 	private final CyNetworkManager networkManager = support.getNetworkManager();
 	private final CyRootNetworkManager rootNetworkManager = support
 			.getRootNetworkFactory();
+	private static final ObjectMapper _jsonMapper = new ObjectMapper();
 
 	private TaskMonitor tm;
 
@@ -53,33 +59,21 @@ public class JdexReaderTest {
 	public void tearDown() throws Exception {
 	}
 
-	/*
+	
 	@Test
 	public void testSmallNetwork() throws Exception {
 		File cyjdex1 = new File(
 				"./src/test/resources/testData/NCI_NATURE.FoxO family signaling.517135.jdex");
-		InputStream is = new FileInputStream(cyjdex1);
-		NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
+		JsonNode inputNetwork =  _jsonMapper.readValue(cyjdex1,ObjectNode.class);
+		NdexBundleReader reader = new NdexBundleReader(inputNetwork, viewFactory,
 				networkFactory, networkManager, rootNetworkManager);
 		reader.run(tm);
 		final CyNetwork[] networks = reader.getNetworks();
 		testLoadedSmallNetwork(networks);
-		is.close();
 
 	}
 
-	@Test
-	public void testBigNetwork() throws Exception {
-		File cyjdex2 = new File(
-				"./src/test/resources/testData/small_corpus.jdex");
-		InputStream is = new FileInputStream(cyjdex2);
-		NdexBundleReader reader = new NdexBundleReader(is, viewFactory,
-				networkFactory, networkManager, rootNetworkManager);
-		reader.run(tm);
-		final CyNetwork[] networks = reader.getNetworks();
-		testLoadedBigNetwork(networks);
-		is.close();
-	}
+
 
 	public void testLoadedSmallNetwork(CyNetwork[] networks) throws Exception {
 		assertNotNull(networks);
@@ -94,65 +88,75 @@ public class JdexReaderTest {
 		CyTable nodeTable = network.getDefaultNodeTable();
 		CyTable edgeTable = network.getDefaultEdgeTable();
 		// テーブルが正しく作られているか
-
-		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
-				.getValues(String.class).indexOf("539302");
-		assertNotEquals(-1, nameIndex);
-
-		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
-		int readableIndex = nodeTable
-				.getColumn(JdexToken.NODE_REPRESENT.getName())
-				.getValues(String.class).indexOf("Ran/GTP");
-		assertNotEquals(-1, readableIndex);
+		
+		List<String> names = nodeTable.getColumn(CyNetwork.NAME).getValues(String.class);
+		long nameIndex = names.indexOf("539302");
+		long notFound = -1;
+		assert(notFound != nameIndex);
+	
+		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENTS.getName()));
+		List<String> termNames = nodeTable
+				.getColumn(JdexToken.NODE_REPRESENTS.getName())
+				.getValues(String.class);
+		long termNameIndex = termNames.indexOf("Ran/GTP");
+		assert(notFound != termNameIndex);
 
 		// display the node table
+		/*
 		for (CyRow row : nodeTable.getAllRows()) {
 			final Map<String, Object> map = row.getAllValues();
-			// System.out.println(map.get(CyNetwork.SUID) + " " +
-			// map.get(CyNetwork.NAME) + " " +
-			// map.get(JdexToken.NODE_REPRESENT.getName()));
+			System.out.println(map.get(CyNetwork.SUID) + " " +
+			map.get(CyNetwork.NAME) + " " +
+				map.get(JdexToken.NODE_REPRESENTS.getName()));
 		}
-
+	*/
 		// display the edge table
+		/*
 		for (CyRow row : edgeTable.getAllRows()) {
 			final Map<String, Object> map = row.getAllValues();
-			// System.out.println(map.get(CyNetwork.SUID) + " " +
-			// map.get(JdexToken.EDGE_PREDICATE.getName()));
+			System.out.println(map.get(CyNetwork.SUID) + " " +
+					map.get(JdexToken.EDGE_PREDICATE.getName()));
 		}
-		
+		*/
 
 	}
 
-	public void testLoadedBigNetwork(CyNetwork[] networks) throws Exception {
+/*	@Test
+	public void testBELNetwork() throws Exception {
+		File cyjdex2 = new File(
+				"./src/test/resources/testData/small_corpus.jdex");
+		JsonNode inputNetwork =  _jsonMapper.readValue(cyjdex2,ObjectNode.class);
+		NdexBundleReader reader = new NdexBundleReader(inputNetwork, viewFactory,
+				networkFactory, networkManager, rootNetworkManager);
+		reader.run(tm);
+		final CyNetwork[] networks = reader.getNetworks();
+		testLoadedBELNetwork(networks);
+	}*/
+	
+	public void testLoadedBELNetwork(CyNetwork[] networks) throws Exception {
 		assertNotNull(networks);
 		assertEquals(1, networks.length);
 		CyNetwork network = networks[0];
 		assertNotNull(network);
-		// ノード1296
+		
 		assertEquals(1296, network.getNodeCount());
-		// エッジ1718
+	
 		assertEquals(1718, network.getEdgeCount());
 
 		CyTable nodeTable = network.getDefaultNodeTable();
 		CyTable edgeTable = network.getDefaultEdgeTable();		
-		// テーブルが正しく作られているか
 
-//		int nameIndex = nodeTable.getColumn(CyNetwork.NAME)
-//				.getValues(String.class).indexOf("539302");
-//		assertNotEquals(-1, nameIndex);
-//
-//		assertNotNull(nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName()));
-//		int readableIndex = nodeTable.getColumn(JdexToken.NODE_REPRESENT.getName())
-//				.getValues(String.class).indexOf("Ran/GTP");
-//		assertNotEquals(-1, readableIndex);
+
 
 		//display the node table
+		/*
 		for(CyRow row : nodeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
-			//System.out.println("SUID = "+map.get(CyNetwork.SUID) + " name = " + map.get(CyNetwork.NAME) + "  represent = " + map.get(JdexToken.NODE_REPRESENT.getName()));
+			System.out.println("SUID = "+map.get(CyNetwork.SUID) + " name = " + map.get(CyNetwork.NAME) + "  represent = " + map.get(JdexToken.NODE_REPRESENTS.getName()));
 		}
-		
+		*/
 		//display the edge table
+		/*
 		for(CyRow row : edgeTable.getAllRows()){
 			final Map<String,Object> map = row.getAllValues();
 			System.out.println(map.get(CyNetwork.SUID) + "\n\t" + 
@@ -164,14 +168,14 @@ public class JdexReaderTest {
 			map.get("support text")
 					);
 		}
-		
-		File outtest = new File(
-				"./src/test/resources/testData/out.csv");
-		OutputStream os  = new FileOutputStream(outtest);
+		*/
+		//File outtest = new File(
+		//		"./src/test/resources/testData/out.csv");
+		//OutputStream os  = new FileOutputStream(outtest);
 		//CSVCyWriter writer = new CSVCyWriter(os, edgeTable, true, false, true, "UTF-8");
 		//writer.run(tm);
 
 	}
 
-*/
+
 }
