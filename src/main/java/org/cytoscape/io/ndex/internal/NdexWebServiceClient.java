@@ -25,8 +25,7 @@ public class NdexWebServiceClient extends AbstractWebServiceGUIClient implements
 			CyRootNetworkManager rootNetworkManager, TaskMonitor tm,NdexSearchPanel panel) {
 		super(uri, displayName, description);
 
-		this.client = new NdexInterface(factory, viewFactory, networkManager,
-				rootNetworkManager, tm);
+		this.client = new NdexInterface(factory, viewFactory, networkManager, rootNetworkManager, tm);
 		
 		this.gui = panel;
 

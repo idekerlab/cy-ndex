@@ -2,7 +2,6 @@ package org.cytoscape.io.ndex.internal;
 
 import java.util.Properties;
 
-import org.cytoscape.io.ndex.internal.rest.NdexInterface;
 import org.cytoscape.io.ndex.internal.ui.NdexSearchPanel;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
