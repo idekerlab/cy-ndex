@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -22,8 +21,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.cytoscape.io.ndex.internal.rest.NdexInterface;
+import org.cytoscape.io.ndex.internal.NdexWebServiceClient;
+import org.cytoscape.io.ndex.internal.helpers.CyNetworkHelpers;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
@@ -32,15 +33,17 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.model.object.Network;
 
 public class NdexSearchPanel extends JPanel {
 
-	// NdexWebServiceClient ndexClient;
-	NdexInterface restClient;
+
+	NdexWebServiceClient ndexClient;
 	TaskManager<?, ?> taskManager;
 	CyNetworkManager manager;
 	CyNetworkViewFactory viewFactory;
 	CyNetworkViewManager viewManager;
+	CyNetworkFactory cyNetworkFactory;
 	private JTextField searchField;
 	private JTable resultTable;
 	private DefaultTableModel tableModel;
@@ -62,6 +65,7 @@ public class NdexSearchPanel extends JPanel {
 		this.viewFactory = viewFactory;
 		this.viewManager = viewManager;
 		this.taskManager = taskManager;
+		
 
 		createUI();
 	}
@@ -227,8 +231,8 @@ public class NdexSearchPanel extends JPanel {
 		taskManager.execute(new TaskIterator(new ImportNetworkTask()));
 	}
 
-	public void setRestClient(NdexInterface restClient) {
-		this.restClient = restClient;
+	public void setNdexClient(NdexWebServiceClient client) {
+		this.ndexClient = client;
 		
 	}
 
@@ -236,16 +240,14 @@ public class NdexSearchPanel extends JPanel {
 		@Override
 		public void run(TaskMonitor taskMonitor) throws Exception {
 			// TODO add authorization
-			restClient.setCredential("dexterpratt", "insecure");
+			ndexClient.setCredential("dexterpratt", "insecure");
 			String searchString = searchField.getText().toUpperCase();
-			List<String> result = new ArrayList<String>(
-					restClient.findNetworks(searchString, "starts-with", 100));
-			System.out.println(result);
+			List<Network> networks = ndexClient.getMal().findNetworksByText(searchString, "starts-with", 100, 0);
+			System.out.println("Found " + networks.size() + " networks for search string = " + searchString);
 
 			tableModel.setRowCount(0);
-			for (String res : result) {
-				//TODO change split character to better string
-				String[] line = res.split(",");
+			for (Network network : networks) {
+				String[] line = {network.getId(), network.getName()};
 				tableModel.addRow(line);
 			}
 		}
@@ -255,11 +257,13 @@ public class NdexSearchPanel extends JPanel {
 		@Override
 		public void run(TaskMonitor taskMonitor) throws Exception {
 			// TODO Auto-generated method stub
-			restClient.setCredential("dexterpratt", "insecure");
+			ndexClient.setCredential("dexterpratt", "insecure");
 			if(resultTable.getSelectedRow()>=0){
 				//TODO extract column number
 				String ndexNetworkId = (String)resultTable.getValueAt(resultTable.getSelectedRow(), 0);
-			CyNetwork network = restClient.getNetworkByEdges(ndexNetworkId, 0, 1000);
+			Network ndexNetwork = ndexClient.getMal().getEdges(ndexNetworkId, 0, 1000);
+			CyNetwork network = ndexClient.createCyNetwork();
+			CyNetworkHelpers.populateNetworkFromNdex(ndexNetwork, network);
 			manager.addNetwork(network);
 			System.out.println("network node count is "+network.getNodeCount());
 			CyNetworkView view = viewFactory.createNetworkView(network);
