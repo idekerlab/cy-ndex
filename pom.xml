@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -10,12 +11,12 @@
 		<maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 	</properties>
-	
+
 	<groupId>org.cytoscape</groupId>
 	<artifactId>cy-ndex2</artifactId>
 	<packaging>bundle</packaging>
 	<version>1.0</version>
-	
+
 	<name>Cytoscape NDEx Interface</name>
 
 	<repositories>
@@ -86,15 +87,15 @@
 	<dependencies>
 
 
-	<!-- Dependencies needed to compile this project. -->
+		<!-- Dependencies needed to compile this project. -->
 
-	
+
 		<dependency>
 			<groupId>org.ndexbio.client</groupId>
 			<artifactId>ndex-java-client</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
@@ -133,13 +134,20 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>work-swing-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- 3rd party libraries -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>2.3.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -158,6 +166,6 @@
 	</dependencies>
 
 </project>
-	</dependencies>
+<dependencies />
 
-</project>
+<project />
