@@ -74,9 +74,9 @@ public class NdexSearchPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(Color.white);
 		setBorder(null);
-		
+		/*
 		createAuthorizationPanel();
-
+	*/
 		createSearchPanel();
 
 		createResultPanel();
@@ -85,9 +85,7 @@ public class NdexSearchPanel extends JPanel {
 	}
 
 	private void createSearchPanel() {
-		
-		
-		
+	
 		JPanel searchTextPanel = new JPanel();
 		FlowLayout fl_searchTextPanel = (FlowLayout) searchTextPanel
 				.getLayout();

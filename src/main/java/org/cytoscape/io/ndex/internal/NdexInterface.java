@@ -21,6 +21,7 @@ public class NdexInterface {
     private CyNetworkFactory factory;
     private CyRootNetworkManager rootNetworkManager;
     
+    public static final NdexInterface INSTANCE = null;
 	
 	public NdexInterface(CyNetworkFactory factory,
 			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
@@ -40,8 +41,8 @@ public class NdexInterface {
 		client.setCredential(username, password);	
 	}
 	
-	public void checkCredential(){
-		mal.checkCredential();
+	public boolean checkCredential(){
+		return mal.checkCredential();
 	}
     
 	
@@ -88,6 +89,23 @@ public class NdexInterface {
 
 	public CyNetwork createCyNetwork() {
 		return factory.createNetwork();
+	}
+
+	public boolean storeCyNetwork(CyNetwork currentNetwork) {
+		Network ndexNetwork = new Network();
+		populateNdexNetwork(currentNetwork);
+		try {
+			if (null != mal.createNetwork(ndexNetwork)) return true;
+			return false;
+		} catch (Exception e) {
+			System.out.println("Error while attempting to store network " + e.getLocalizedMessage());
+			return false;
+		}
+	}
+
+	private void populateNdexNetwork(CyNetwork currentNetwork) {
+		// TODO Auto-generated method stub
+		
 	}  
 
 }
