@@ -2,6 +2,7 @@ package org.cytoscape.io.ndex.internal;
 
 import java.util.List;
 
+import org.cytoscape.io.ndex.internal.helpers.CyNetworkToNdexNetworkTranslationTask;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
@@ -21,7 +22,7 @@ public class NdexInterface {
     private CyNetworkFactory factory;
     private CyRootNetworkManager rootNetworkManager;
     
-    public static final NdexInterface INSTANCE = null;
+    public static NdexInterface INSTANCE = null;
 	
 	public NdexInterface(CyNetworkFactory factory,
 			CyNetworkViewFactory viewFactory, CyNetworkManager networkManager,
@@ -91,21 +92,16 @@ public class NdexInterface {
 		return factory.createNetwork();
 	}
 
-	public boolean storeCyNetwork(CyNetwork currentNetwork) {
-		Network ndexNetwork = new Network();
-		populateNdexNetwork(currentNetwork);
+	public boolean storeNetwork(Network network) throws Exception {
+		
 		try {
-			if (null != mal.createNetwork(ndexNetwork)) return true;
-			return false;
+
+			if (null != mal.createNetwork(network)) return true;
+			throw new Exception("Unexpected null response while storing network");
 		} catch (Exception e) {
-			System.out.println("Error while attempting to store network " + e.getLocalizedMessage());
-			return false;
+			throw new Exception("Error while attempting to store network " + e.getLocalizedMessage());
 		}
 	}
 
-	private void populateNdexNetwork(CyNetwork currentNetwork) {
-		// TODO Auto-generated method stub
-		
-	}  
 
 }

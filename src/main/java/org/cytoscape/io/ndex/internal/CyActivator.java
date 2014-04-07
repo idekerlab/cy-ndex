@@ -3,6 +3,7 @@ package org.cytoscape.io.ndex.internal;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.io.ndex.internal.helpers.CyNetworkToNdexNetworkTranslationTaskFactory;
 import org.cytoscape.io.ndex.internal.ui.NdexSearchPanel;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.session.CyNetworkNaming;
@@ -41,15 +42,19 @@ public class CyActivator extends AbstractCyActivator {
 		CyRootNetworkManager cyRootNetworkManagerServiceRef = getService(bc,
 				CyRootNetworkManager.class);
 
-		// search and import Panel
+		// NDExInterface
+		NdexInterface.INSTANCE = new NdexInterface(cyNetworkFactoryServiceRef, cyNetworkViewFactoryServiceRef, cyNetworkManagerServiceRef, cyRootNetworkManagerServiceRef, null);
+
+		//
+		// Search and Import Panel
+		//
 		 NdexSearchPanel panel = new NdexSearchPanel(
 				 taskManager, 
 				 cyNetworkManagerServiceRef, 
 				 cyNetworkViewFactoryServiceRef, 
 				 cyNetworkViewManagerServiceRef);
 		
-		// web client
-		//NdexInterface.INSTANCE = 
+		
 		String uri = "http://localhost/";
 		String displayName = "NDEx client";
 		String description = "this is NDEx client";
@@ -61,7 +66,9 @@ public class CyActivator extends AbstractCyActivator {
 		panel.setNdexClient(ndexWebServiceClient);
 		registerAllServices(bc, ndexWebServiceClient, new Properties());
 		
-		// NDEx Sign In
+		//
+		// NDEx Sign In Action
+		//
 		NdexSignInAction ndexSignInAction = new NdexSignInAction(
 				cySwingApplicationServiceRef, 
 				cyApplicationManagerServiceRef,
@@ -69,12 +76,22 @@ public class CyActivator extends AbstractCyActivator {
 				cyNetworkViewManagerServiceRef, 
 				cyNetworkNamingServiceRef,
 				taskManager);
-
+		
+		
 		final Properties props = new Properties();
 		props.setProperty(ServiceProperties.ID, "ndexSignInAction");
 		registerService(bc, ndexSignInAction, CyAction.class, props); 
 		
-		// NDEx Sign In
+		//
+		// NDEx Store Network Task
+		//
+		CyNetworkToNdexNetworkTranslationTaskFactory storeNetworkTaskFactory = new CyNetworkToNdexNetworkTranslationTaskFactory(cyApplicationManagerServiceRef);
+		Properties storeNetworkFactoryProps = new Properties();
+		storeNetworkFactoryProps.setProperty("preferredMenu","Apps.NDEx");
+		storeNetworkFactoryProps.setProperty("title","Store Current Network on NDEx Server");
+		registerService(bc,storeNetworkTaskFactory,TaskFactory.class, storeNetworkFactoryProps);
+		
+	/*
 		NdexStoreNetworkAction ndexStoreNetworkAction = new NdexStoreNetworkAction(
 						cyApplicationManagerServiceRef);
 
@@ -82,7 +99,7 @@ public class CyActivator extends AbstractCyActivator {
 		storeNetworkProps.setProperty(ServiceProperties.ID, "ndexStoreNetworkAction");
 		registerService(bc, ndexStoreNetworkAction, CyAction.class, storeNetworkProps); 
 		
-		/*
+		
 		NdexSignInTaskFactory ndexSignInTaskFactory = new NdexSignInTaskFactory(cyNetworkManagerServiceRef,cyNetworkNamingServiceRef,cyNetworkFactoryServiceRef);
 		
 		Properties ndexSignInFactoryProps = new Properties();
